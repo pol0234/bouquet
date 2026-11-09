@@ -21,22 +21,23 @@
   var mulberry32 = BotanicEngine.mulberry32;
   var LEAF_COL = BotanicEngine.LEAF_COL;
 
-  function buildBouquet(seed) {
+  function buildBouquet(seed, Hu) {
     var rnd = mulberry32(seed || 5521);
+    var baseBy = (Hu && Hu > 1.2) ? (Hu - 0.08) : 1.26;
 
     var flowers = [
       // 1. Puky na vrchole
-      createFlower({ t: 'bud', x: 0.50, y: 0.13, r: 0.042, rot: 0.04,  d: 0.72, c: ['#78350f', '#d97706', '#fef08a'], spread: 0.22 }, 101),
-      createFlower({ t: 'bud', x: 0.38, y: 0.17, r: 0.038, rot: -0.15, d: 0.78, c: ['#1e3a8a', '#3b82f6', '#93c5fd'], spread: 0.20 }, 102),
-      createFlower({ t: 'bud', x: 0.74, y: 0.21, r: 0.036, rot: 0.35,  d: 0.66, c: ['#7f1d1d', '#ef4444', '#fca5a5'], spread: 0.24 }, 103),
+      createFlower({ t: 'bud', x: 0.50, y: 0.13, r: 0.042, rot: 0.04,  d: 0.72, by: baseBy, c: ['#78350f', '#d97706', '#fef08a'], spread: 0.22 }, 101),
+      createFlower({ t: 'bud', x: 0.38, y: 0.17, r: 0.038, rot: -0.15, d: 0.78, by: baseBy, c: ['#1e3a8a', '#3b82f6', '#93c5fd'], spread: 0.20 }, 102),
+      createFlower({ t: 'bud', x: 0.74, y: 0.21, r: 0.036, rot: 0.35,  d: 0.66, by: baseBy, c: ['#7f1d1d', '#ef4444', '#fca5a5'], spread: 0.24 }, 103),
 
       // 2. Fialové levandule na okrajoch (vertikálna elegancia)
-      createFlower({ t: 'lavender', x: 0.16, y: 0.30, r: 0.068, rot: -0.42, d: 0.60, c: ['#3b0764', '#9333ea', '#f5d0fe'] }, 201),
-      createFlower({ t: 'lavender', x: 0.82, y: 0.31, r: 0.068, rot: 0.40,  d: 0.58, c: ['#3b0764', '#9333ea', '#f5d0fe'] }, 202),
+      createFlower({ t: 'lavender', x: 0.16, y: 0.30, r: 0.068, rot: -0.42, d: 0.60, by: baseBy, c: ['#3b0764', '#9333ea', '#f5d0fe'] }, 201),
+      createFlower({ t: 'lavender', x: 0.82, y: 0.31, r: 0.068, rot: 0.40,  d: 0.58, by: baseBy, c: ['#3b0764', '#9333ea', '#f5d0fe'] }, 202),
 
       // 3. Modré nevädze (vysoko kontrastné kobaltové akcenty)
-      createFlower({ t: 'cornflower', x: 0.32, y: 0.28, r: 0.084, rot: -0.18, d: 0.52, c: ['#0c1b3f', '#2563eb', '#60a5fa'] }, 301),
-      createFlower({ t: 'cornflower', x: 0.21, y: 0.46, r: 0.096, rot: -0.32, d: 0.32, c: ['#0f172a', '#2563eb', '#38bdf8'] }, 302),
+      createFlower({ t: 'cornflower', x: 0.32, y: 0.28, r: 0.084, rot: -0.18, d: 0.52, by: baseBy, c: ['#0c1b3f', '#2563eb', '#60a5fa'] }, 301),
+      createFlower({ t: 'cornflower', x: 0.21, y: 0.46, r: 0.096, rot: -0.32, d: 0.32, by: baseBy, c: ['#0f172a', '#2563eb', '#38bdf8'] }, 302),
 
       // 4. Hero slnečnica 2 (horná pravá, orientovaná k svetlu, bohaté zlato)
       createFlower({
@@ -46,6 +47,7 @@
         rot: 0.22,
         sq: 0.90,
         d: 0.42,
+        by: baseBy,
         c: ['#854d0e', '#f59e0b', '#fef08a'],
         centerCol: ['#120602', '#3d1706', '#9a3412', '#f59e0b']
       }, 401),
@@ -58,16 +60,17 @@
         rot: -0.04,
         sq: 0.94,
         d: 0.28,
+        by: baseBy,
         c: ['#78350f', '#f59e0b', '#fef08a'],
         centerCol: ['#100502', '#361506', '#854d0e', '#fde047']
       }, 402),
 
       // 6. Sýtočervený divý mak
-      createFlower({ t: 'poppy', x: 0.66, y: 0.70, r: 0.110, rot: 0.20, d: 0.18, c: ['#450a0a', '#dc2626', '#f87171'] }, 501),
+      createFlower({ t: 'poppy', x: 0.66, y: 0.70, r: 0.110, rot: 0.20, d: 0.18, by: baseBy, c: ['#450a0a', '#dc2626', '#f87171'] }, 501),
 
       // 7. Biele margaréty so žltým terčíkom
-      createFlower({ t: 'daisy', x: 0.23, y: 0.74, r: 0.078, rot: -0.28, d: 0.14, c: ['#475569', '#f8fafc', '#ffffff'] }, 601),
-      createFlower({ t: 'daisy', x: 0.42, y: 0.82, r: 0.068, rot: 0.06,  d: 0.08, c: ['#475569', '#f8fafc', '#ffffff'] }, 602)
+      createFlower({ t: 'daisy', x: 0.23, y: 0.74, r: 0.078, rot: -0.28, d: 0.14, by: baseBy, c: ['#475569', '#f8fafc', '#ffffff'] }, 601),
+      createFlower({ t: 'daisy', x: 0.42, y: 0.82, r: 0.068, rot: 0.06,  d: 0.08, by: baseBy, c: ['#475569', '#f8fafc', '#ffffff'] }, 602)
     ];
 
     // Zoradenie hlávok podľa vertikálnej osi Y pre prirodzenú hĺbku

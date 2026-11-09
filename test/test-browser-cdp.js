@@ -47,7 +47,7 @@ server.listen(PORT, async () => {
     '--window-size=1200,900',
     '--virtual-time-budget=2000',
     `--screenshot=${screenshotPath}`,
-    `http://localhost:${PORT}/index.html`
+    `http://localhost:${PORT}/index.html?bloom=1`
   ];
 
   try {

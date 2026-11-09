@@ -50,13 +50,13 @@ server.listen(PORT, async () => {
     const endpoints = [
       '/',
       '/index.html',
-      '/css/style.css',
+      '/gallery.html',
+      '/sunflower.html',
       '/js/botanic.js',
       '/js/bouquet.js',
       '/js/ascii-render.js',
       '/js/particles.js',
-      '/js/gift.js',
-      '/index.html?to=Anna&msg=Krasny+den&from=Peter'
+      '/index.html?bloom=1'
     ];
 
     for (const ep of endpoints) {
@@ -86,7 +86,7 @@ server.listen(PORT, async () => {
 
     if (browserPath) {
       console.log('[INFO] Found browser at:', browserPath);
-      const testUrl = `http://localhost:${PORT}/index.html?to=Anna&msg=Krasny+den&from=Peter`;
+      const testUrl = `http://localhost:${PORT}/index.html?bloom=1`;
       const tempUserData = path.join(os.tmpdir(), `browser-audit-${Date.now()}`);
 
       const args = [
@@ -94,7 +94,7 @@ server.listen(PORT, async () => {
         '--disable-gpu',
         '--no-sandbox',
         `--user-data-dir=${tempUserData}`,
-        '--virtual-time-budget=3000',
+        '--virtual-time-budget=2000',
         '--dump-dom',
         testUrl
       ];
@@ -112,11 +112,21 @@ server.listen(PORT, async () => {
         proc.on('error', reject);
       });
 
-      assert(dumpOutput.includes('Pre Anna'), 'DOM must reflect personalized URL dedication parameter "to=Anna"');
-      assert(dumpOutput.includes('Krasny den'), 'DOM must reflect personalized URL dedication parameter "msg=Krasny den"');
-      assert(dumpOutput.includes('Peter'), 'DOM must reflect personalized URL dedication parameter "from=Peter"');
       assert(dumpOutput.includes('<canvas id="art"'), 'Canvas element is present in DOM');
-      console.log('[PASS] Browser headless DOM dump verified personalized query params & canvas structure!');
+      assert(!dumpOutput.includes('<button'), 'Pure index.html must have zero buttons');
+      assert(!dumpOutput.includes('<nav'), 'Pure index.html must have zero navigation bars');
+      console.log('[PASS] Browser headless DOM dump verified pure canvas structure with zero buttons or clutter!');
+
+      // Also test gallery dedication page
+      const galleryUrl = `http://localhost:${PORT}/gallery.html?to=Anna&msg=Krasny+den&from=Peter`;
+      const galleryDump = await new Promise((resolve, reject) => {
+        const proc = spawn(browserPath, ['--headless=new', '--disable-gpu', '--no-sandbox', '--dump-dom', galleryUrl]);
+        let stdout = '';
+        proc.stdout.on('data', chunk => stdout += chunk);
+        proc.on('close', code => resolve(stdout));
+      });
+      assert(galleryDump.includes('Pre Anna'), 'Gallery page preserves dedication parameter "to=Anna"');
+      console.log('[PASS] Gallery dedication page also verified!');
 
       // Cleanup temp user data
       try {

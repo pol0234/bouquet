@@ -2,162 +2,131 @@
 <html lang="sk">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="Generatívna ASCII kytica so slnečnicami a lúčnymi kvetmi kvitnúca v reálnom čase na HTML5 Canvas.">
-  <title>ASCII Slnečnicová Kytica | Who needs flowers when you can code them?</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <title>Slnečnicová Kytica | ASCII Floral Art</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23070608'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' fill='%23f59e0b' text-anchor='middle' font-weight='bold'%3E*%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23030205'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' fill='%23f59e0b' text-anchor='middle' font-weight='bold'%3E*%3C/text%3E%3C/svg%3E">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      background: #030205;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    canvas {
+      display: block;
+      object-fit: contain;
+      outline: none;
+      box-shadow: 0 0 80px rgba(245, 158, 11, 0.04);
+    }
+  </style>
 </head>
 <body>
 
-  <main class="wrap">
-    <header class="head">
-      <p class="eyebrow">Botanické ASCII Plátno 2.0</p>
-      <h1>Who needs flowers when <em>you</em> can code them?</h1>
-      <p class="lede">Procedurálna letná kytica so slnečnicami, sýtomodrými nevädzami, divým makom a poľnými margarétami. Každý lupeň a semenná špirála sú generované v reálnom čase pomocou nízko-rozlíšeného vektorového buffera a ASCII shaderu.</p>
-    </header>
-
-    <section class="stage-wrap">
-      <div class="stage" id="stage">
-        <canvas id="art" aria-label="Animovaná ASCII kytica slnečníc a lúčnych kvetov"></canvas>
-      </div>
-      <div class="meta">
-        <span id="gridInfo">104 x 70 znakov</span>
-        <span id="activeInfo">Vykresľovanie...</span>
-      </div>
-    </section>
-
-    <section class="controls" aria-label="Ovládanie mriežky">
-      <div class="field">
-        <div class="label-row">
-          <label for="detail">Hustota detailov mriežky</label>
-          <output id="detailOut">126 stĺpcov</output>
-        </div>
-        <input id="detail" type="range" min="68" max="180" step="2" value="126">
-      </div>
-
-      <div class="btn-row">
-        <button type="button" class="btn btn-primary" id="btnReplay">Rozkvitnúť znova</button>
-        <button type="button" class="btn" id="btnDedicate">Venovať kyticu</button>
-        <button type="button" class="btn" id="btnSavePng" title="Stiahnuť kyticu ako PNG obrázok">Uložiť PNG</button>
-        <a href="sunflower.html" class="btn" style="text-decoration: none; border-color: var(--accent);" title="Čistá verzia bez textu, kalibrovaná na 110 stĺpcov pre mobil aj desktop">Čistá kytica (110 stĺpcov) ↗</a>
-      </div>
-    </section>
-
-    <div class="gift-wrap" id="giftWrap">
-      <div class="gift-card">
-        <div class="gift-to" id="giftTo">Pre Teba</div>
-        <div class="gift-msg" id="giftMsg">Slnko a kvety, ktoré nikdy nezvädnú, pretože sú napísané v kóde.</div>
-        <div class="gift-from" id="giftFrom">S láskou</div>
-      </div>
-    </div>
-  </main>
-
-  <div class="share-modal" id="shareModal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
-    <div class="modal-box">
-      <div class="modal-head">
-        <h2 class="modal-title" id="shareModalTitle">Venovanie ku kytici</h2>
-        <button type="button" class="modal-close" id="modalClose" aria-label="Zavrieť">&times;</button>
-      </div>
-      <div class="field">
-        <label class="label-row" for="inputTo">Komu (Meno)</label>
-        <input class="modal-input" id="inputTo" maxlength="50" placeholder="napr. Anna" autocomplete="off">
-      </div>
-      <div class="field">
-        <label class="label-row" for="inputMsg">Odkaz</label>
-        <input class="modal-input" id="inputMsg" maxlength="160" placeholder="napr. Krásny slnečný deň!" autocomplete="off">
-      </div>
-      <div class="field">
-        <label class="label-row" for="inputFrom">Od koho</label>
-        <input class="modal-input" id="inputFrom" maxlength="50" placeholder="napr. Peter" autocomplete="off">
-      </div>
-      <div class="btn-row" style="margin-top: 6px;">
-        <button type="button" class="btn btn-primary" id="btnCopyLink">Skopírovať odkaz</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast">Odkaz skopírovaný do schránky</div>
+  <canvas id="art" aria-label="ASCII Slnečnicová Kytica"></canvas>
 
   <script src="js/botanic.js"></script>
   <script src="js/bouquet.js"></script>
   <script src="js/ascii-render.js"></script>
   <script src="js/particles.js"></script>
-  <script src="js/gift.js"></script>
 
   <script>
   (function () {
     'use strict';
 
     var MONO = '"JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace';
-    var ASPECT = 0.74;
     var S = 3;
     var BG = '#030205';
+    var TARGET_COLS = 110; // Presný level detailov ~110 stĺpcov
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     var canvas = document.getElementById('art');
     var ctx = canvas.getContext('2d');
     var off = document.createElement('canvas');
     var octx = off.getContext('2d', { willReadFrequently: true });
-    var stageEl = document.getElementById('stage');
 
     var renderer = AsciiRasterizer.createAsciiRenderer({
       samplesPerCell: S,
       background: BG
     });
     var particles = ParticleSystem.createParticleSystem(4211);
-    var bouquet = BouquetScene.buildBouquet(7731);
 
-    var userCols = null;
-    var cols = 126, rows = 84, cw = 6.0, ch = 12.0, fs = 10;
-    var Wd = 756, Hd = 1008, Hu = 1.33, SW = 0, SH = 0, dpr = 1;
+    var currentSeed = 7731;
+    var Hu = 1.36;
+    var bouquet = BouquetScene.buildBouquet(currentSeed, Hu);
+
+    var cols = TARGET_COLS, rows = 76, cw = 7.0, ch = 14.0, fs = 12;
+    var Wd = 770, Hd = 1040, SW = 0, SH = 0, dpr = 1;
     var hashes = new Uint32Array(1);
-    var t0 = performance.now(), last = 0, frameNo = 0, activeCount = 0;
+    var t0 = performance.now(), frameNo = 0;
     var targetWind = 0, currentMouseWind = 0;
 
-    var gridInfo = document.getElementById('gridInfo');
-    var activeInfo = document.getElementById('activeInfo');
-    var detail = document.getElementById('detail');
-    var detailOut = document.getElementById('detailOut');
-    var giftWrap = document.getElementById('giftWrap');
-    var giftShown = false;
-
-    var gift = GiftModule.initGift({
-      giftWrap: giftWrap,
-      giftTo: document.getElementById('giftTo'),
-      giftMsg: document.getElementById('giftMsg'),
-      giftFrom: document.getElementById('giftFrom'),
-      shareModal: document.getElementById('shareModal'),
-      inputTo: document.getElementById('inputTo'),
-      inputMsg: document.getElementById('inputMsg'),
-      inputFrom: document.getElementById('inputFrom'),
-      toast: document.getElementById('toast')
-    });
-
+    /* Nativny responsivny layout - efektivne vyuziva plochu na mobile aj PC */
     function layout() {
-      var avail = stageEl.clientWidth || 600;
-      cols = userCols || (avail < 380 ? 80 : avail < 520 ? 104 : avail < 720 ? 126 : 142);
-      fs = avail / cols / 0.6;
+      var vw = window.innerWidth;
+      var vh = window.innerHeight;
+
+      // Zistenie pomeru strán zariadenia
+      var isPortrait = (vh > vw * 1.15);
+
+      // Na mobile: kytica má vyšší vertikálny profil (Hu ≈ 1.48 - 1.62) a vyplní celú výšku displeja
+      // Na PC / desktope: kytica má harmonický proporčný profil (Hu ≈ 1.36) a vyplní 96% výšky
+      Hu = isPortrait ? Math.min(1.65, Math.max(1.46, (vh / vw) * 0.76)) : 1.36;
+
+      var maxW = vw * (isPortrait ? 0.98 : 0.96);
+      var maxH = vh * (isPortrait ? 0.98 : 0.96);
+
+      if (maxW * Hu <= maxH) {
+        Wd = maxW;
+        Hd = Wd * Hu;
+      } else {
+        Hd = maxH;
+        Wd = Hd / Hu;
+      }
+
+      cols = TARGET_COLS;
+      fs = Wd / cols / 0.6;
       ctx.font = '500 ' + fs + 'px ' + MONO;
       var m = ctx.measureText('M').width;
       cw = m > 0 ? m : fs * 0.6;
       ch = fs * 1.2;
+
+      // Presné zarovnanie na mriežku
       Wd = cols * cw;
-      rows = Math.max(20, Math.round(Wd / ASPECT / ch));
+      rows = Math.max(20, Math.round(Hd / ch));
       Hd = rows * ch;
       Hu = Hd / Wd;
 
       SW = cols * S;
       SH = rows * S;
 
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, 2.5);
       canvas.width = Math.round(Wd * dpr);
       canvas.height = Math.round(Hd * dpr);
+      canvas.style.width = Math.round(Wd) + 'px';
+      canvas.style.height = Math.round(Hd) + 'px';
+
       off.width = SW;
       off.height = SH;
 
@@ -166,18 +135,14 @@
         hashes[i] = BotanicEngine.hash(i);
       }
 
-      if (detail && !userCols) {
-        detail.value = cols;
-        detailOut.value = cols + ' stĺpcov';
-      }
+      // Prestavba kytice s prispôsobenou dĺžkou stoniek pre daný displej
+      bouquet = BouquetScene.buildBouquet(currentSeed, Hu);
     }
 
     function render(time, T, extraWind) {
-      // 1. Vektorové vykreslenie do miniatúrneho offscreen buffera s interaktívnym vánkom
       BouquetScene.renderBouquetScene(octx, bouquet, T, time, SW, SH, Hu, extraWind);
 
-      // 2. ASCII rasterizácia so supersamplingom a časticami
-      activeCount = renderer.renderAscii(octx, ctx, {
+      renderer.renderAscii(octx, ctx, {
         SW: SW,
         SH: SH,
         cols: cols,
@@ -195,20 +160,6 @@
       });
     }
 
-    function updateInfo(T) {
-      if (gridInfo) {
-        gridInfo.textContent = cols + ' × ' + rows + ' znakov';
-      }
-      if (activeInfo) {
-        if (T < 4.5 && !reduce && !forcedBloom) {
-          var pct = Math.min(100, Math.round((T / 4.5) * 100));
-          activeInfo.textContent = 'Kvitnutie ' + pct + '% • ' + activeCount.toLocaleString('sk-SK') + ' glyfov';
-        } else {
-          activeInfo.textContent = 'V plnom kvete • ' + activeCount.toLocaleString('sk-SK') + ' glyfov';
-        }
-      }
-    }
-
     var urlParams = new URLSearchParams(window.location.search);
     var forcedBloom = urlParams.has('bloom');
 
@@ -217,114 +168,81 @@
       var T = (reduce || forcedBloom) ? 6.0 : (now - t0) * 0.001;
       var time = reduce ? 0 : now * 0.001;
 
-      // Plynulá reakcia stoniek na pohyb myši
+      // Organická reakcia stoniek na pohyb
       currentMouseWind += (targetWind - currentMouseWind) * 0.06;
 
       render(time, T, currentMouseWind);
-
-      if (now - last > 180) {
-        updateInfo(T);
-        last = now;
-      }
-
-      // Automatické zobrazenie kartičky s venovaním po dokončení rozkvitnutia (T > 4.6 s)
-      if (!giftShown && T > 4.6) {
-        giftShown = true;
-        gift.showCard();
-      }
-
       requestAnimationFrame(frame);
     }
 
-    // Interaktívny fyzikálny vánok myšou a dotykom
-    stageEl.addEventListener('mousemove', function (e) {
-      var rect = stageEl.getBoundingClientRect();
-      var relX = (e.clientX - rect.left) / rect.width - 0.5;
-      targetWind = relX * 1.4;
+    /* Opätovné rozkvitnutie po kliknutí / ťuknutí kdekoľvek na obrazovku */
+    function rebloom() {
+      t0 = performance.now();
+      forcedBloom = false;
+      currentSeed = Math.floor(Math.random() * 100000);
+      bouquet = BouquetScene.buildBouquet(currentSeed, Hu);
+    }
+
+    // Kliknutie myšou na PC
+    window.addEventListener('click', function () {
+      rebloom();
     });
 
-    stageEl.addEventListener('mouseleave', function () {
-      targetWind = 0;
-    });
-
-    stageEl.addEventListener('touchmove', function (e) {
+    // Ťuknutie na mobile (odlíšenie tapu od posunu prsta)
+    var touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+    window.addEventListener('touchstart', function (e) {
       if (e.touches && e.touches[0]) {
-        var rect = stageEl.getBoundingClientRect();
-        var relX = (e.touches[0].clientX - rect.left) / rect.width - 0.5;
-        targetWind = relX * 1.4;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchStartTime = performance.now();
       }
     }, { passive: true });
 
-    stageEl.addEventListener('touchend', function () {
+    window.addEventListener('touchend', function (e) {
+      var dt = performance.now() - touchStartTime;
+      var dx = (e.changedTouches && e.changedTouches[0]) ? Math.abs(e.changedTouches[0].clientX - touchStartX) : 0;
+      var dy = (e.changedTouches && e.changedTouches[0]) ? Math.abs(e.changedTouches[0].clientY - touchStartY) : 0;
+
+      // Ak išlo o krátke ťuknutie na mieste, spustiť rozkvitnutie
+      if (dt < 350 && dx < 12 && dy < 12) {
+        rebloom();
+      }
+      targetWind = 0;
+    }, { passive: true });
+
+    // Jemný vánok pri pohybe myši
+    window.addEventListener('mousemove', function (e) {
+      var relX = (e.clientX / window.innerWidth) - 0.5;
+      targetWind = relX * 1.5;
+    });
+
+    window.addEventListener('mouseleave', function () {
       targetWind = 0;
     });
 
-    // Uloženie vyrenderovaného ASCII plátna ako PNG
-    var btnSavePng = document.getElementById('btnSavePng');
-    if (btnSavePng) {
-      btnSavePng.addEventListener('click', function () {
-        var link = document.createElement('a');
-        link.download = 'slnecnicova-kytica-ascii.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        gift.showToast('Obrázok kytice uložený do stiahnutých súborov');
-      });
-    }
+    // Jemný vánok pri ťahaní prstom po displeji
+    window.addEventListener('touchmove', function (e) {
+      if (e.touches && e.touches[0]) {
+        var relX = (e.touches[0].clientX / window.innerWidth) - 0.5;
+        targetWind = relX * 1.5;
+      }
+    }, { passive: true });
 
-    // Event listenery pre interakciu
+    // Nativne prispôsobenie pri otočení obrazovky alebo zmene okna
     window.addEventListener('resize', function () {
       layout();
-      updateInfo();
     });
 
-    detail.addEventListener('input', function () {
-      userCols = parseInt(detail.value, 10);
-      detailOut.value = userCols + ' stĺpcov';
-      layout();
-      updateInfo();
-    });
-
-    document.getElementById('btnReplay').addEventListener('click', function () {
-      t0 = performance.now();
-      giftShown = false;
-      bouquet = BouquetScene.buildBouquet(Math.floor(Math.random() * 10000));
-    });
-
-    var shareModal = document.getElementById('shareModal');
-    var btnDedicate = document.getElementById('btnDedicate');
-    var modalClose = document.getElementById('modalClose');
-    var btnCopyLink = document.getElementById('btnCopyLink');
-
-    btnDedicate.addEventListener('click', function () {
-      shareModal.classList.add('open');
-    });
-
-    modalClose.addEventListener('click', function () {
-      shareModal.classList.remove('open');
-    });
-
-    shareModal.addEventListener('click', function (e) {
-      if (e.target === shareModal) shareModal.classList.remove('open');
-    });
-
-    btnCopyLink.addEventListener('click', function () {
-      gift.copyShareLink();
-    });
-
-    // Spustenie
     layout();
-    updateInfo();
 
     if (document.fonts && document.fonts.load) {
       document.fonts.load('500 12px "JetBrains Mono"').then(function () {
         layout();
-        updateInfo();
       }, function () {});
     }
 
     if (reduce) {
-      render(0, 8.0);
-      updateInfo();
+      render(0, 8.0, 0);
     } else {
       requestAnimationFrame(frame);
     }
@@ -332,4 +250,3 @@
   </script>
 </body>
 </html>
-

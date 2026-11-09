@@ -6,7 +6,7 @@ const { spawn } = require('child_process');
 const assert = require('assert');
 
 const projectRoot = path.resolve(__dirname, '..');
-const PORT = 8149;
+const PORT = 8155;
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -19,7 +19,7 @@ const MIME_TYPES = {
 const server = http.createServer((req, res) => {
   const urlObj = new URL(req.url, `http://localhost:${PORT}`);
   let pathname = urlObj.pathname;
-  if (pathname === '/') pathname = '/sunflower.html';
+  if (pathname === '/') pathname = '/index.html';
 
   const filePath = path.join(projectRoot, pathname);
   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
@@ -34,8 +34,6 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, async () => {
   const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-  const mobileShot = path.join(projectRoot, 'mobile_110cols.png');
-  const desktopShot = path.join(projectRoot, 'desktop_110cols.png');
 
   async function takeShot(w, h, out) {
     const tempUserData = path.join(os.tmpdir(), `chrome-aud-${Date.now()}`);
@@ -47,7 +45,7 @@ server.listen(PORT, async () => {
       `--window-size=${w},${h}`,
       '--virtual-time-budget=2000',
       `--screenshot=${out}`,
-      `http://localhost:${PORT}/sunflower.html?bloom=1`
+      `http://localhost:${PORT}/index.html?bloom=1`
     ];
     await new Promise((resolve, reject) => {
       const proc = spawn(chromePath, args, { stdio: 'ignore' });
@@ -58,18 +56,19 @@ server.listen(PORT, async () => {
   }
 
   try {
-    console.log('[AUDIT] Capturing Desktop 110 cols screenshot (1200x900)...');
-    await takeShot(1200, 900, desktopShot);
-    const dStats = fs.statSync(desktopShot);
-    console.log(`[PASS] Desktop screenshot: ${desktopShot} (${dStats.size} bytes)`);
+    const shotDesktop = path.join(projectRoot, 'shot_desktop.png');
+    const shotIphone = path.join(projectRoot, 'shot_mobile_iphone.png');
 
-    console.log('[AUDIT] Capturing Mobile 110 cols screenshot (390x844 iPhone 14)...');
-    await takeShot(390, 844, mobileShot);
-    const mStats = fs.statSync(mobileShot);
-    console.log(`[PASS] Mobile screenshot: ${mobileShot} (${mStats.size} bytes)`);
+    console.log('[AUDIT] Capturing Desktop 16:9 (1440x900)...');
+    await takeShot(1440, 900, shotDesktop);
+    console.log(`[PASS] Desktop screenshot: ${shotDesktop} (${fs.statSync(shotDesktop).size} bytes)`);
+
+    console.log('[AUDIT] Capturing iPhone 14 Pro (393x852)...');
+    await takeShot(393, 852, shotIphone);
+    console.log(`[PASS] iPhone screenshot: ${shotIphone} (${fs.statSync(shotIphone).size} bytes)`);
 
     server.close();
-    console.log('[SUCCESS] Both Mobile and Desktop 110-col versions verified!');
+    console.log('[SUCCESS] All pure canvas responsive tests passed!');
     process.exit(0);
   } catch (err) {
     console.error(err);
