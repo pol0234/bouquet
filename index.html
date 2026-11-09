@@ -162,6 +162,8 @@
 
     var urlParams = new URLSearchParams(window.location.search);
     var forcedBloom = urlParams.has('bloom');
+    var seedParam = urlParams.get('seed');
+    if (seedParam) currentSeed = parseInt(seedParam, 10) || currentSeed;
 
     function frame(now) {
       frameNo++;
@@ -232,6 +234,11 @@
     window.addEventListener('resize', function () {
       layout();
     });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', function () {
+        layout();
+      });
+    }
 
     layout();
 
