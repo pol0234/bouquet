@@ -166,7 +166,7 @@
     }
   }
 
-  function renderBouquetScene(octx, bouquet, T, time, SW, SH, Hu) {
+  function renderBouquetScene(octx, bouquet, T, time, SW, SH, Hu, extraWind) {
     octx.setTransform(1, 0, 0, 1, 0, 0);
     octx.globalAlpha = 1;
     octx.fillStyle = '#000000';
@@ -175,8 +175,9 @@
     // Škálovanie do botanického priestoru [0, 1] x [0, Hu]
     octx.setTransform(SW, 0, 0, SH / Hu, 0, 0);
 
-    // Jemný organický vánok
-    var wind = 0.50 * (0.65 + 0.35 * Math.sin(time * 0.37) * Math.sin(time * 0.11 + 1.3));
+    // Jemný organický vánok + interaktívny vánok myši
+    var baseWind = 0.50 * (0.65 + 0.35 * Math.sin(time * 0.37) * Math.sin(time * 0.11 + 1.3));
+    var wind = baseWind + (extraWind || 0);
     updateStems(bouquet.flowers, time, wind);
 
     var i;

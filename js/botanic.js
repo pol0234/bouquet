@@ -103,6 +103,7 @@
      - Dvojvrstvové usporiadanie lupeňov, ktoré sa prekrývajú bez čiernych dier
      - Každý lupeň má nádherný tvar slnečného lúča s jantárovou bázou a zlatým hrotom
      - Pozdĺžna centrálna žilka s vysokým jasom pre 3D reliéf
+     - Organické rozvíjanie lupeňov z púčika počas rozkvetu
      - Veľký centrálny terč s bohatým Fibonacciho vzorom semien a zlatým peľovým vencom
      - Zelený zákrov (involucre)
   ------------------------------------------------------------- */
@@ -113,7 +114,9 @@
     octx.save();
     octx.scale(1, f.sq || 0.94);
 
-    var discRadius = R * 0.42;
+    // Organické rozvíjanie z púčika: pri b < 0.8 sú lupene jemne stiahnuté
+    var uncurl = clamp((b - 0.2) / 0.8);
+    var discRadius = R * (0.36 + 0.06 * uncurl);
 
     // A. Zelený zákrov pod kvetom (Involucral bracts)
     var numBracts = 18;
