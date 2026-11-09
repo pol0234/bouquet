@@ -249,66 +249,7 @@
     }
   }
 
-  /* Elegantné floristické previazanie stoniek (rafiová stužka v páse kytice) */
-  function drawBouquetTie(octx, Hu, T, time, wind) {
-    var g = eo(clamp((T - 0.40) / 1.2));
-    if (g <= 0.01) return;
-
-    var tieY = Hu * 0.74;
-    var tieW = 0.085 * g;
-    var tieH = 0.022 * g;
-    var sx = wind * 0.006 * Math.sin(time * 1.2);
-
-    octx.save();
-    octx.translate(0.49 + sx, tieY);
-
-    // 1. Tmavý separačný podklad pod mašľou
-    octx.fillStyle = '#1c0a02';
-    octx.fillRect(-tieW * 1.05, -tieH * 1.05, tieW * 2.1, tieH * 2.1);
-
-    // 2. Teplý jantárovo-zlatý viazací pás
-    var grad = octx.createLinearGradient(0, -tieH, 0, tieH);
-    grad.addColorStop(0, '#9a3412');
-    grad.addColorStop(0.35, '#f59e0b');
-    grad.addColorStop(0.70, '#d97706');
-    grad.addColorStop(1, '#78350f');
-
-    octx.fillStyle = grad;
-    octx.fillRect(-tieW, -tieH, tieW * 2, tieH * 2);
-
-    // 3. Krížové previazanie zlatou šnúrkou (rafia cord)
-    octx.strokeStyle = '#fef08a';
-    octx.globalAlpha = 0.85;
-    octx.lineWidth = 0.0030;
-
-    octx.beginPath();
-    octx.moveTo(-tieW * 0.85, -tieH);
-    octx.lineTo(tieW * 0.85, tieH);
-    octx.moveTo(-tieW * 0.85, tieH);
-    octx.lineTo(tieW * 0.85, -tieH);
-    octx.stroke();
-
-    // 4. Stredový uzol a visiace konce stužiek
-    octx.fillStyle = '#f59e0b';
-    octx.beginPath();
-    octx.ellipse(0, 0, tieW * 0.24, tieH * 1.15, 0, 0, Math.PI * 2);
-    octx.fill();
-
-    var tailLen = 0.065 * g;
-    octx.strokeStyle = '#fbbf24';
-    octx.lineWidth = 0.0035;
-    octx.beginPath();
-    octx.moveTo(-0.008, tieH);
-    octx.quadraticCurveTo(-0.020, tieH + tailLen * 0.5, -0.015 + sx * 2, tieH + tailLen);
-    octx.moveTo(0.008, tieH);
-    octx.quadraticCurveTo(0.020, tieH + tailLen * 0.5, 0.018 + sx * 2, tieH + tailLen * 0.95);
-    octx.stroke();
-
-    octx.globalAlpha = 1;
-    octx.restore();
-  }
-
-  function renderBouquetScene(octx, bouquet, T, time, SW, SH, Hu, extraWind, cw, ch) {
+  function renderBouquetScene(octx, bouquet, T, time, SW, SH, Hu, extraWind, cw, ch, layoutInfo) {
     octx.setTransform(1, 0, 0, 1, 0, 0);
     octx.globalAlpha = 1;
     octx.fillStyle = '#000000';
@@ -318,8 +259,12 @@
     // Aby kruh v normalized priestore bol dokonalým kruhom aj na obrazovke,
     // vertikálne škálovanie v octx MUSÍ rešpektovať pomer písma cw / ch!
     var charAspect = (cw && ch) ? (cw / ch) : 0.5;
-    var scaleY = SW * charAspect;
-    octx.setTransform(SW, 0, 0, scaleY, 0, 0);
+    var S_val = (layoutInfo && layoutInfo.S) ? layoutInfo.S : 3;
+    var bX = layoutInfo ? (layoutInfo.colOffset * S_val) : 0;
+    var bY = layoutInfo ? (layoutInfo.rowOffset * S_val) : 0;
+    var bSW = layoutInfo ? (layoutInfo.bouquetCols * S_val) : SW;
+    var scaleY = bSW * charAspect;
+    octx.setTransform(bSW, 0, 0, scaleY, bX, bY);
 
     // Vánok
     var baseWind = 0.50 * (0.65 + 0.35 * Math.sin(time * 0.37) * Math.sin(time * 0.11 + 1.3));
@@ -335,13 +280,10 @@
       }
     }
 
-    // 2. Stonky
+    // 2. Stonky (ponechané čisté botanické stonky bez akéhokoľvek viazacieho pásu)
     drawStems(octx, bouquet.flowers, T);
 
-    // 3. Ozdobné viazanie kytice v páse
-    drawBouquetTie(octx, Hu, T, time, wind);
-
-    // 4. Predné listy
+    // 3. Predné listy
     for (i = 0; i < bouquet.leaves.length; i++) {
       var Lf = bouquet.leaves[i];
       if (Lf.front) {
@@ -349,7 +291,7 @@
       }
     }
 
-    // 5. Kvetné hlávky
+    // 4. Kvetné hlávky
     for (i = 0; i < bouquet.headOrder.length; i++) {
       drawFlowerHead(octx, bouquet.headOrder[i], T, time);
     }

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23030205'/%3E%3Ctext x='16' y='22' font-family='%22JetBrains Mono%22, Consolas, monospace' font-size='16' fill='%2394a3b8' text-anchor='middle' font-weight='700'%3E%26lt%3B3%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23050508'/%3E%3Ctext x='16' y='21' font-family='Consolas, ui-monospace, monospace' font-size='14' font-weight='400' fill='%23a1a1aa' text-anchor='middle'%3E%26lt%3B3%3C/text%3E%3C/svg%3E">
 
   <style>
     * {
@@ -25,9 +25,8 @@
       height: 100dvh;
       background: #030205;
       overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      margin: 0;
+      padding: 0;
       cursor: pointer;
       user-select: none;
       -webkit-user-select: none;
@@ -35,9 +34,15 @@
     }
 
     canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       display: block;
       outline: none;
-      box-shadow: 0 0 80px rgba(245, 158, 11, 0.04);
+      border: none;
+      box-shadow: none;
       touch-action: none;
     }
   </style>
@@ -76,54 +81,74 @@
 
     var cols = TARGET_COLS, rows = 0, cw = 0, ch = 0, fs = 0;
     var Wd = 0, Hd = 0, SW = 0, SH = 0, dpr = 1;
+    var layoutInfo = null;
     var hashes = new Uint32Array(1);
     var t0 = performance.now(), frameNo = 0;
     var targetWind = 0, currentMouseWind = 0;
 
-    /* Nativny responsivny layout - efektivne vyuziva plochu na mobile aj PC */
+    /* Nativny responsivny layout - 100% fullscreen celistva plocha bez vyrezov na mobile aj PC */
     function layout() {
       var vw = window.innerWidth;
       var vh = window.innerHeight;
-
-      // Zistenie orientácie zariadenia
       var isPortrait = (vh >= vw);
 
-      if (isPortrait) {
-        // Na mobile: plátno natívne vyplní celú obrazovku bez zbytočných čiernych okrajov
-        Wd = vw;
-        Hd = vh;
-      } else {
-        // Na PC / desktope (landscape): majestátny vertikálny profil vycentrovaný na displeji
-        Hd = vh * 0.95;
-        Wd = Math.min(vw * 0.95, Hd / 1.36);
-      }
-
-      cols = TARGET_COLS;
-      var targetCw = Wd / cols;
-
-      // Zistenie reálneho pomeru šírky písma pre presné zarovnanie na okraje obrazovky
       ctx.font = '500 50px ' + MONO;
       var testM = ctx.measureText('M').width;
       var fontRatio = (testM > 0) ? (testM / 50) : 0.55;
 
-      fs = targetCw / fontRatio;
-      cw = targetCw;
-      ch = fs * 1.20;
+      var bouquetCols = TARGET_COLS;
+      var colOffset = 0, rowOffset = 0, bouquetRows = 0;
 
-      // Presné zarovnanie na mriežku
-      Wd = cols * cw;
-      rows = Math.max(24, Math.round(Hd / ch));
-      Hd = rows * ch;
-      Hu = Hd / Wd;
+      if (isPortrait) {
+        // Mobil / Portrait: plátno natívne vyplní celú obrazovku s ~110 stĺpcami
+        cols = TARGET_COLS;
+        cw = vw / cols;
+        fs = cw / fontRatio;
+        ch = fs * 1.20;
+        rows = Math.max(24, Math.round(vh / ch));
+        ch = vh / rows;
+        bouquetRows = rows;
+        Hu = (rows * ch) / (cols * cw);
+      } else {
+        // Desktop / PC (Landscape): majestátna kytica vycentrovaná v strede širokouhlého monitora
+        // Kytica zaberá elegantných ~92% výšky obrazovky bez akýchkoľvek okrajov či výrezov
+        var targetBouquetH = vh * 0.92;
+        var targetBouquetW = targetBouquetH / 1.36;
+        var approxCw = targetBouquetW / TARGET_COLS;
+        cols = Math.max(TARGET_COLS, Math.round(vw / approxCw));
+        cw = vw / cols;
+        fs = cw / fontRatio;
+        ch = fs * 1.20;
+        rows = Math.max(28, Math.round(vh / ch));
+        ch = vh / rows;
 
+        bouquetRows = Math.max(24, Math.min(rows, Math.round(targetBouquetH / ch)));
+        Hu = (bouquetRows * ch) / (bouquetCols * cw);
+        colOffset = Math.max(0, Math.floor((cols - bouquetCols) / 2));
+        rowOffset = Math.max(0, Math.floor((rows - bouquetRows) / 2));
+      }
+
+      Wd = vw;
+      Hd = vh;
       SW = cols * S;
       SH = rows * S;
+
+      layoutInfo = {
+        S: S,
+        cols: cols,
+        rows: rows,
+        colOffset: colOffset,
+        rowOffset: rowOffset,
+        bouquetCols: bouquetCols,
+        bouquetRows: bouquetRows
+      };
 
       dpr = Math.min(window.devicePixelRatio || 1, 2.5);
       canvas.width = Math.round(Wd * dpr);
       canvas.height = Math.round(Hd * dpr);
-      canvas.style.width = Math.round(Wd) + 'px';
-      canvas.style.height = Math.round(Hd) + 'px';
+      canvas.style.width = Wd + 'px';
+      canvas.style.height = Hd + 'px';
+      ctx.font = '500 ' + fs + 'px ' + MONO;
 
       off.width = SW;
       off.height = SH;
@@ -133,12 +158,12 @@
         hashes[i] = BotanicEngine.hash(i);
       }
 
-      // Prestavba kytice s adaptívnou výškou presne pre tento displej
       bouquet = BouquetScene.buildBouquet(currentSeed, Hu);
     }
 
     function render(time, T, extraWind) {
-      BouquetScene.renderBouquetScene(octx, bouquet, T, time, SW, SH, Hu, extraWind, cw, ch);
+      ctx.font = '500 ' + fs + 'px ' + MONO;
+      BouquetScene.renderBouquetScene(octx, bouquet, T, time, SW, SH, Hu, extraWind, cw, ch, layoutInfo);
 
       renderer.renderAscii(octx, ctx, {
         SW: SW,
