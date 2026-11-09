@@ -53,3 +53,4 @@ Pre spustenie testov:
 ```bash
 npm test
 ```
+

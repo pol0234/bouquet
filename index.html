@@ -39,6 +39,7 @@
       object-fit: contain;
       outline: none;
       box-shadow: 0 0 80px rgba(245, 158, 11, 0.04);
+      touch-action: none;
     }
   </style>
 </head>
@@ -178,8 +179,14 @@
     }
 
     /* Opätovné rozkvitnutie po kliknutí / ťuknutí kdekoľvek na obrazovku */
+    var lastRebloomTime = 0;
     function rebloom() {
-      t0 = performance.now();
+      var now = performance.now();
+      // Ochrana pred dvojitým spustením (touchend + syntetizovaný click na mobilných prehliadačoch)
+      if (now - lastRebloomTime < 400) return;
+      lastRebloomTime = now;
+
+      t0 = now;
       forcedBloom = false;
       currentSeed = Math.floor(Math.random() * 100000);
       bouquet = BouquetScene.buildBouquet(currentSeed, Hu);
