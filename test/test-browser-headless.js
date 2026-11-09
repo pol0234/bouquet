@@ -115,8 +115,8 @@ server.listen(PORT, async () => {
       assert(dumpOutput.includes('<canvas id="art"'), 'Canvas element is present in DOM');
       assert(!dumpOutput.includes('<button'), 'Pure index.html must have zero buttons');
       assert(!dumpOutput.includes('<nav'), 'Pure index.html must have zero navigation bars');
-      assert(dumpOutput.includes('%26lt%3B3') || dumpOutput.includes('&lt;3') || dumpOutput.includes('<3'), 'Favicon must contain the <3 heart icon');
-      console.log('[PASS] Browser headless DOM dump verified pure canvas structure, zero buttons, and <3 favicon!');
+      assert(dumpOutput.includes('rel="icon"') && dumpOutput.includes('image/svg+xml'), 'Favicon must be configured with SVG data URI');
+      console.log('[PASS] Browser headless DOM dump verified pure canvas structure, zero buttons, and SVG favicon!');
 
       // Also test gallery dedication page
       const galleryUrl = `http://localhost:${PORT}/gallery.html?to=Anna&msg=Krasny+den&from=Peter`;
