@@ -35,3 +35,4 @@ assert.strictEqual(p1.x, f.hx, 'bez at 1 matches head hx');
 assert.strictEqual(p1.y, f.hy, 'bez at 1 matches head hy');
 
 console.log('✓ All Botanic Engine tests passed!');
+

@@ -35,10 +35,10 @@
     <section class="controls" aria-label="Ovládanie mriežky">
       <div class="field">
         <div class="label-row">
-          <label for="detail">Hustota mriežky</label>
-          <output id="detailOut">104 stĺpcov</output>
+          <label for="detail">Hustota detailov mriežky</label>
+          <output id="detailOut">126 stĺpcov</output>
         </div>
-        <input id="detail" type="range" min="56" max="150" step="2" value="104">
+        <input id="detail" type="range" min="68" max="180" step="2" value="126">
       </div>
 
       <div class="btn-row">
@@ -112,8 +112,8 @@
     var bouquet = BouquetScene.buildBouquet(7731);
 
     var userCols = null;
-    var cols = 104, rows = 70, cw = 7.2, ch = 14.4, fs = 12;
-    var Wd = 750, Hd = 1010, Hu = 1.35, SW = 0, SH = 0, dpr = 1;
+    var cols = 126, rows = 84, cw = 6.0, ch = 12.0, fs = 10;
+    var Wd = 756, Hd = 1008, Hu = 1.33, SW = 0, SH = 0, dpr = 1;
     var hashes = new Uint32Array(1);
     var t0 = performance.now(), last = 0, frameNo = 0, activeCount = 0;
 
@@ -138,7 +138,7 @@
 
     function layout() {
       var avail = stageEl.clientWidth || 600;
-      cols = userCols || (avail < 380 ? 64 : avail < 520 ? 76 : avail < 720 ? 94 : 108);
+      cols = userCols || (avail < 380 ? 80 : avail < 520 ? 104 : avail < 720 ? 126 : 142);
       fs = avail / cols / 0.6;
       ctx.font = '500 ' + fs + 'px ' + MONO;
       var m = ctx.measureText('M').width;
@@ -201,9 +201,12 @@
       }
     }
 
+    var urlParams = new URLSearchParams(window.location.search);
+    var forcedBloom = urlParams.has('bloom');
+
     function frame(now) {
       frameNo++;
-      var T = reduce ? 8.0 : (now - t0) * 0.001;
+      var T = (reduce || forcedBloom) ? 6.0 : (now - t0) * 0.001;
       var time = reduce ? 0 : now * 0.001;
 
       render(time, T);
@@ -283,3 +286,4 @@
   </script>
 </body>
 </html>
+

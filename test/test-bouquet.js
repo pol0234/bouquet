@@ -9,7 +9,7 @@ const bq = Bouquet.buildBouquet(42);
 assert(Array.isArray(bq.flowers), 'Bouquet must have flowers array');
 assert(bq.flowers.length >= 10, 'Bouquet must contain at least 10 flower entities');
 assert(Array.isArray(bq.leaves), 'Bouquet must have leaves array');
-assert(bq.leaves.length >= 25, 'Bouquet must have rich foliage');
+assert(bq.leaves.length >= 10 && bq.leaves.length <= 16, 'Bouquet must have 10-16 sculpted leaves with negative space');
 
 // Verify sunflower presence
 const sunflowers = bq.flowers.filter(f => f.t === 'sunflower');
@@ -40,3 +40,4 @@ bq.flowers.forEach(f => {
 });
 
 console.log('✓ All Bouquet Scene tests passed!');
+

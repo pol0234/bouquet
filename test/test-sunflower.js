@@ -40,3 +40,4 @@ for (let k = 1; k <= numSeeds; k++) {
 }
 
 console.log('✓ All Sunflower tests passed!');
+

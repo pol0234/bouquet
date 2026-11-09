@@ -28,3 +28,4 @@ const comp = calcSat(0.5, 0.5);
 assert(comp > 0 && comp <= 255, 'Saturation compensation stays within 0-255');
 
 console.log('✓ All ASCII Rasterizer tests passed!');
+

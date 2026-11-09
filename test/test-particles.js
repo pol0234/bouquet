@@ -26,3 +26,4 @@ ps.drawForeground(mockCtx, 100, 70, 7.2, 14.4, 1.0);
 assert(mockCtx.fillTextCalls > bgCalls, 'Pollen particles rendered');
 
 console.log('✓ All Particle System tests passed!');
+
