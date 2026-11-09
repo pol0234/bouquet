@@ -1,0 +1,21 @@
+{
+  "name": "ascii-sunflower-bouquet",
+  "version": "2.0.0",
+  "description": "Elaborate procedural ASCII bouquet featuring sunflowers and vibrant meadow flora blooming in real-time on HTML5 canvas",
+  "main": "index.html",
+  "scripts": {
+    "test": "node test/test-sunflower.js && node test/test-botanic.js && node test/test-ascii-render.js && node test/test-particles.js && node test/test-bouquet.js && node test/test-browser-headless.js && node test/test-browser-cdp.js",
+    "test:unit": "node test/test-sunflower.js && node test/test-botanic.js && node test/test-ascii-render.js && node test/test-particles.js && node test/test-bouquet.js",
+    "test:browser": "node test/test-browser-headless.js && node test/test-browser-cdp.js"
+  },
+  "keywords": [
+    "ascii-art",
+    "canvas",
+    "generative-art",
+    "sunflower",
+    "botanical",
+    "realtime-bloom"
+  ],
+  "author": "",
+  "license": "MIT"
+}
