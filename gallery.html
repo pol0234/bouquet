@@ -174,7 +174,7 @@
 
     function render(time, T, extraWind) {
       // 1. Vektorové vykreslenie do miniatúrneho offscreen buffera s interaktívnym vánkom
-      BouquetScene.renderBouquetScene(octx, bouquet, T, time, SW, SH, Hu, extraWind);
+      BouquetScene.renderBouquetScene(octx, bouquet, T, time, SW, SH, Hu, extraWind, cw, ch);
 
       // 2. ASCII rasterizácia so supersamplingom a časticami
       activeCount = renderer.renderAscii(octx, ctx, {

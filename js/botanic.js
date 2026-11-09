@@ -73,19 +73,19 @@
       t: 'sunflower',
       x: 0.5,
       y: 0.5,
-      r: 0.16,
+      r: 0.155,
       rot: 0,
-      sq: 0.94, // Jemné eliptické skreslenie pre 3D natočenie
+      sq: 1.0, // Izotropné proporcie pre dokonalú kruhovitosť
       d: 0.25,
       ph: rnd() * 6.28,
-      bx: 0.5 + (rnd() - 0.5) * 0.05,
-      by: 1.26,
-      bow: (rnd() - 0.5) * 0.10,
+      bx: 0.5 + (rnd() - 0.5) * 0.04,
+      by: 1.25,
+      bow: (rnd() - 0.5) * 0.08,
       a0: rnd() * 1.0,
       stemCol: STEM_COL[Math.floor(rnd() * STEM_COL.length)],
-      stemW: 0.009 + rnd() * 0.003,
-      c: ['#854d0e', '#f59e0b', '#fef08a'],
-      centerCol: ['#120602', '#3d1706', '#9a3412', '#f59e0b']
+      stemW: 0.0085 + rnd() * 0.0025,
+      c: ['#9a3412', '#f59e0b', '#fef08a'],
+      centerCol: ['#3d1a08', '#6b2d08', '#b45309', '#facc15']
     };
     for (var k in def) {
       f[k] = def[k];
@@ -100,106 +100,105 @@
 
   /* -------------------------------------------------------------
      1. VYSOKO DETAILNÁ SLNEČNICA (Helianthus annuus)
-     - Dvojvrstvové usporiadanie lupeňov, ktoré sa prekrývajú bez čiernych dier
-     - Každý lupeň má nádherný tvar slnečného lúča s jantárovou bázou a zlatým hrotom
-     - Pozdĺžna centrálna žilka s vysokým jasom pre 3D reliéf
-     - Organické rozvíjanie lupeňov z púčika počas rozkvetu
-     - Veľký centrálny terč s bohatým Fibonacciho vzorom semien a zlatým peľovým vencom
-     - Zelený zákrov (involucre)
+     - 16 vonkajších + 14 vnútorných kopijovitých lupeňov s negatívnym priestorom
+     - Výrazné biele centrálne žilky pre 3D lúčovitý ASCII profil
+     - Zamatovo-bronzový terč s bohatým zlatým peľovým vencom a 84 Fibonacciho floretmi
   ------------------------------------------------------------- */
   function drawSunflower(octx, f, b, time) {
     var R = f.r * b;
     if (R <= 0.001) return;
 
     octx.save();
-    octx.scale(1, f.sq || 0.94);
+    if (f.sq && f.sq !== 1.0) {
+      octx.scale(1, f.sq);
+    }
 
-    // Organické rozvíjanie z púčika: pri b < 0.8 sú lupene jemne stiahnuté
-    var uncurl = clamp((b - 0.2) / 0.8);
-    var discRadius = R * (0.36 + 0.06 * uncurl);
+    var discRadius = R * 0.35;
 
-    // A. Zelený zákrov pod kvetom (Involucral bracts)
-    var numBracts = 18;
+    // A. Zákrovové zelené sepaly pod kvetom (Involucre)
+    var numBracts = 16;
     for (var s = 0; s < numBracts; s++) {
-      var sang = f.a0 + s * (Math.PI * 2 / numBracts) + 0.08;
-      var slen = R * 0.68;
-      var swid = slen * 0.18;
+      var sang = f.a0 + s * (Math.PI * 2 / numBracts) + 0.1;
+      var slen = R * 0.62;
+      var swid = slen * 0.16;
       octx.save();
       octx.rotate(sang);
       octx.beginPath();
       octx.moveTo(discRadius * 0.6, 0);
-      octx.quadraticCurveTo(slen * 0.5, -swid, slen, 0);
-      octx.quadraticCurveTo(slen * 0.5, swid, discRadius * 0.6, 0);
-      octx.fillStyle = (s % 2 === 0) ? '#163c0e' : '#225516';
+      octx.quadraticCurveTo(slen * 0.45, -swid, slen, 0);
+      octx.quadraticCurveTo(slen * 0.45, swid, discRadius * 0.6, 0);
+      octx.fillStyle = (s % 2 === 0) ? '#163c0e' : '#235c17';
       octx.fill();
       octx.restore();
     }
 
-    // B. Plné, žiarivé okvetné lupene (Ray florets)
-    // 2 vrstvy: Pass 0 (spodná/vonkajšia, 24 lupeňov), Pass 1 (vrchná/vnútorná, 24 lupeňov s posunom)
-    var petalsPerTier = 24;
-    for (var pass = 0; pass < 2; pass++) {
-      var isInner = (pass === 1);
-      var pLen = isInner ? (R * 0.92) : R;
-      var pWid = pLen * 0.155; // Plný, veľkorysý tvar lupeňa
-      var angStep = (Math.PI * 2) / petalsPerTier;
-      var angOffset = isInner ? (angStep * 0.5) : 0;
+    // B. Jednotlivé, ostro oddelené okvetné lístky (Ray florets)
+    // Tier 0: 16 vonkajších dlhých lúčov (lenRatio = 1.00)
+    // Tier 1: 14 vnútorných lúčov s posunom (lenRatio = 0.88)
+    var tiers = [
+      { count: 16, lenRatio: 1.00, widRatio: 0.19, offset: 0 },
+      { count: 14, lenRatio: 0.88, widRatio: 0.17, offset: Math.PI / 16 }
+    ];
 
-      for (var i = 0; i < petalsPerTier; i++) {
-        var baseAng = f.a0 + i * angStep + angOffset;
-        var flutter = 0.02 * Math.sin(time * 1.8 + f.ph + i * 0.6 + pass * 2.5);
-        var curLen = pLen * (1 + 0.035 * Math.sin(i * 3.5 + f.ph));
+    for (var t = 0; t < tiers.length; t++) {
+      var tier = tiers[t];
+      var isInner = (t === 1);
+      var pLen = R * tier.lenRatio;
+      var pWid = pLen * tier.widRatio;
+      var angStep = (Math.PI * 2) / tier.count;
+
+      for (var i = 0; i < tier.count; i++) {
+        var baseAng = f.a0 + i * angStep + tier.offset;
+        var flutter = 0.015 * Math.sin(time * 1.6 + f.ph + i * 0.7 + t * 2.1);
+        var curLen = pLen * (1 + 0.03 * Math.sin(i * 3.7 + f.ph));
 
         octx.save();
         octx.rotate(baseAng + flutter);
 
-        // Tvar lupeňa slnečnice: začína pod okrajom terča, rozširuje sa a končí elegantnou špičkou
+        // Kopijovitý tvar lupeňa: rozširuje sa v prvej tretine a končí v ostrej špičke
+        var petalSpan = curLen - discRadius * 0.90;
         octx.beginPath();
-        octx.moveTo(discRadius * 0.75, 0);
-        // Spodná krivka
+        octx.moveTo(discRadius * 0.90, 0);
         octx.bezierCurveTo(
-          discRadius + curLen * 0.18, -pWid * 1.15,
-          curLen * 0.72, -pWid * 0.85,
+          discRadius * 0.90 + petalSpan * 0.35, -pWid,
+          curLen - petalSpan * 0.25, -pWid * 0.60,
           curLen, 0
         );
-        // Horná krivka
         octx.bezierCurveTo(
-          curLen * 0.72, pWid * 0.85,
-          discRadius + curLen * 0.18, pWid * 1.15,
-          discRadius * 0.75, 0
+          curLen - petalSpan * 0.25, pWid * 0.60,
+          discRadius * 0.90 + petalSpan * 0.35, pWid,
+          discRadius * 0.90, 0
         );
         octx.closePath();
 
-        // Farba: Hlboký jantár pri báze -> Sýte teplé zlato -> Žiarivá žltá
-        var grad = octx.createLinearGradient(discRadius * 0.7, 0, curLen, 0);
+        // Teplý gradient: jantárová báza -> sýta marigold žltá -> svetlý slnečný hrot
+        var grad = octx.createLinearGradient(discRadius * 0.85, 0, curLen, 0);
         if (!isInner) {
-          // Vonkajšia vrstva: sýte zlato s jasným hrotom
-          grad.addColorStop(0, '#92400e');   // Teplá jantárová báza
-          grad.addColorStop(0.28, '#d97706'); // Teplé zlato
-          grad.addColorStop(0.70, '#f59e0b'); // Žiarivé zlato
-          grad.addColorStop(1.0, '#fef08a');  // Slnečný hrot
+          grad.addColorStop(0, '#9a3412');    // Hlboký jantár
+          grad.addColorStop(0.28, '#f59e0b'); // Sýte zlato
+          grad.addColorStop(0.80, '#fde047'); // Žiarivá žltá
+          grad.addColorStop(1.0, '#fef08a');  // Špička
         } else {
-          // Vnútorná vrstva: jasnejšie tóny vystupujúce dopredu
           grad.addColorStop(0, '#b45309');
-          grad.addColorStop(0.35, '#f59e0b');
-          grad.addColorStop(0.80, '#fde047');
-          grad.addColorStop(1.0, '#fef9c3');
+          grad.addColorStop(0.32, '#fbbf24');
+          grad.addColorStop(0.82, '#fef08a');
+          grad.addColorStop(1.0, '#fffbeb');
         }
         octx.fillStyle = grad;
         octx.fill();
 
-        // Jemný separačný obrys medzi lupeňmi (teplý mahagón)
-        octx.strokeStyle = '#451a03';
-        octx.globalAlpha = 0.55;
-        octx.lineWidth = 0.0022;
+        // Tmavý obrys pre separáciu lístkov (zaručuje, že susedné lupene nesplynú)
+        octx.strokeStyle = '#220901';
+        octx.globalAlpha = 0.70;
+        octx.lineWidth = 0.0030;
         octx.stroke();
 
-        // Centrálna svetelná žilka (specular ridge) pre 3D plasticitu
+        // Žiarivá centrálna žilka (specular spine pre vysoký ASCII kontrast)
         octx.beginPath();
-        octx.moveTo(discRadius * 0.85, 0);
-        octx.lineTo(curLen * 0.90, 0);
-        octx.strokeStyle = '#fffde0';
-        octx.globalAlpha = isInner ? 0.65 : 0.45;
+        octx.moveTo(discRadius * 0.95, 0);
+        octx.lineTo(curLen * 0.92, 0);
+        octx.strokeStyle = '#ffffff';
+        octx.globalAlpha = isInner ? 0.75 : 0.55;
         octx.lineWidth = 0.0026;
         octx.stroke();
 
@@ -208,64 +207,58 @@
       }
     }
 
-    // C. Veľký centrálny terč slnečnice (Phyllotaxis Disc)
-    // 1. Podkladový radiálny gradient (čokoládový stred až zlatohnedý okraj)
+    // C. Zamatovo-bronzový terč slnečnice (Žiadna čierna diera!)
     var discGrad = octx.createRadialGradient(0, 0, 0, 0, 0, discRadius);
-    var cc = f.centerCol || ['#120602', '#3d1706', '#9a3412', '#f59e0b'];
-    discGrad.addColorStop(0, cc[0]);        // Zamatový espresso stred
-    discGrad.addColorStop(0.40, cc[1]);     // Tmavé semienka
-    discGrad.addColorStop(0.72, cc[2]);     // Jantárové pásmo otvárania kvetov
-    discGrad.addColorStop(0.92, '#b45309'); // Teplý bronz
-    discGrad.addColorStop(1.0, '#f59e0b');  // Zlaté rozhranie prechádzajúce do lupeňov
+    discGrad.addColorStop(0, '#381604');    // Teplá zamatová čokoláda v strede
+    discGrad.addColorStop(0.50, '#652a0a'); // Bohatý jantár
+    discGrad.addColorStop(0.80, '#9a3412'); // Hrejivý bronz
+    discGrad.addColorStop(1.0, '#d97706');  // Prechod do žiarivých lupeňov
 
     octx.beginPath();
     octx.arc(0, 0, discRadius, 0, Math.PI * 2);
     octx.fillStyle = discGrad;
     octx.fill();
 
-    // 2. Fibonacciho semienka podľa Vogelovho modelu (Phyllotaxis) - 150 bodov
-    var numSeeds = 150;
+    // D. Fibonacciho semenný vzor (Phyllotaxis disk florets)
+    // Zlatý peľový veniec na okraji terča
+    var numSeeds = 84;
     for (var k = 1; k <= numSeeds; k++) {
       var rFrac = Math.sqrt(k / numSeeds);
-      var rk = discRadius * rFrac * 0.96;
+      var rk = discRadius * rFrac * 0.95;
       var thetak = k * PHI_ANGLE + f.a0;
       var sx = Math.cos(thetak) * rk;
       var sy = Math.sin(thetak) * rk;
 
-      if (rFrac > 0.70) {
-        // Otvorené kvietky na okraji terča so zlatým peľom
+      if (rFrac > 0.68) {
         octx.fillStyle = (k % 2 === 0) ? '#fde047' : '#f59e0b';
         octx.globalAlpha = 0.95;
-        var sz = 0.0044;
         octx.beginPath();
-        octx.arc(sx, sy, sz, 0, Math.PI * 2);
+        octx.arc(sx, sy, 0.0042, 0, Math.PI * 2);
         octx.fill();
-      } else if (rFrac > 0.35) {
-        // Stredné pásmo semienok
-        octx.fillStyle = (k % 2 === 0) ? '#9a3412' : '#78350f';
-        octx.globalAlpha = 0.75;
+      } else if (rFrac > 0.32) {
+        octx.fillStyle = '#f59e0b';
+        octx.globalAlpha = 0.85;
         octx.beginPath();
-        octx.arc(sx, sy, 0.0034, 0, Math.PI * 2);
+        octx.arc(sx, sy, 0.0036, 0, Math.PI * 2);
         octx.fill();
       } else {
-        // Zamatový čokoládový stred
-        octx.fillStyle = (k % 3 === 0) ? '#451a03' : '#1c0c04';
-        octx.globalAlpha = 0.60;
+        octx.fillStyle = '#b45309';
+        octx.globalAlpha = 0.70;
         octx.beginPath();
         octx.arc(sx, sy, 0.0030, 0, Math.PI * 2);
         octx.fill();
       }
     }
 
-    // 3. Vonkajší veniec peľu (Floret Crown)
-    var pollenCount = 36;
+    // Peľový prstenec po obvode terča
+    var pollenCount = 28;
     for (var p = 0; p < pollenCount; p++) {
       var pa = f.a0 + p * (Math.PI * 2 / pollenCount);
       var pr = discRadius * (0.91 + 0.05 * Math.sin(p * 2.5));
       octx.fillStyle = '#fef08a';
-      octx.globalAlpha = 0.92;
+      octx.globalAlpha = 0.95;
       octx.beginPath();
-      octx.arc(Math.cos(pa) * pr, Math.sin(pa) * pr, 0.0038, 0, Math.PI * 2);
+      octx.arc(Math.cos(pa) * pr, Math.sin(pa) * pr, 0.0036, 0, Math.PI * 2);
       octx.fill();
     }
 
@@ -274,19 +267,17 @@
   }
 
   /* -------------------------------------------------------------
-     2. NEVÄDZA POĽNÁ / MODRÁ CHRPA (Centaurea cyanus)
-     - Výrazné zúbkované trojcípe kvietky (trident lobes)
-     - Sýtomodrá až nebeská azúrová s fialovým stredom
+     2. NEVÄDZA POĽNÁ (Centaurea cyanus)
   ------------------------------------------------------------- */
   function drawCornflower(octx, f, b, time) {
     var R = f.r * b;
     if (R <= 0.001) return;
 
-    var numFlorets = 12;
+    var numFlorets = 10;
     for (var i = 0; i < numFlorets; i++) {
       var ang = f.a0 + i * (Math.PI * 2 / numFlorets) + 0.03 * Math.sin(time * 1.5 + i);
       var L = R * (0.90 + 0.10 * Math.sin(i * 2.3 + f.ph));
-      var w = L * 0.26;
+      var w = L * 0.28;
 
       octx.save();
       octx.rotate(ang);
@@ -296,37 +287,36 @@
       octx.lineTo(L * 0.50, -w * 0.70);
       octx.lineTo(L * 0.85, -w);
       octx.lineTo(L * 0.88, -w * 0.35);
-      octx.lineTo(L, 0); // Stredný hrot
+      octx.lineTo(L, 0);
       octx.lineTo(L * 0.88, w * 0.35);
       octx.lineTo(L * 0.85, w);
       octx.lineTo(L * 0.50, w * 0.70);
       octx.closePath();
 
       var g = octx.createLinearGradient(0, 0, L, 0);
-      g.addColorStop(0, '#0f172a');   // Hlboká indigo
-      g.addColorStop(0.35, '#1d4ed8'); // Kráľovská modrá
-      g.addColorStop(0.80, '#38bdf8'); // Žiarivá azúrová
-      g.addColorStop(1.0, '#bae6fd');  // Zúbky
+      g.addColorStop(0, '#0f172a');
+      g.addColorStop(0.35, '#1d4ed8');
+      g.addColorStop(0.80, '#38bdf8');
+      g.addColorStop(1.0, '#bae6fd');
       octx.fillStyle = g;
       octx.fill();
 
       octx.strokeStyle = '#08142b';
       octx.globalAlpha = 0.65;
-      octx.lineWidth = 0.0024;
+      octx.lineWidth = 0.0026;
       octx.stroke();
 
       octx.globalAlpha = 1;
       octx.restore();
     }
 
-    // Fialovo-modrý stred s drobnými tyčinkami
     octx.fillStyle = '#1e1035';
     octx.beginPath();
     octx.arc(0, 0, R * 0.22, 0, Math.PI * 2);
     octx.fill();
 
-    for (var j = 0; j < 9; j++) {
-      var ja = j * (Math.PI * 2 / 9) + f.a0;
+    for (var j = 0; j < 8; j++) {
+      var ja = j * (Math.PI * 2 / 8) + f.a0;
       var jx = Math.cos(ja) * R * 0.16;
       var jy = Math.sin(ja) * R * 0.16;
       octx.fillStyle = '#c4b5fd';
@@ -338,8 +328,6 @@
 
   /* -------------------------------------------------------------
      3. DIVÝ POĽNÝ MAK (Papaver rhoeas)
-     - Veľké jemne zvlnené hodvábne lupene s čiernymi bazálnymi škvrnami
-     - Zelená makovica a veniec žltých tyčiniek
   ------------------------------------------------------------- */
   function drawPoppy(octx, f, b, time) {
     var R = f.r * b;
@@ -348,7 +336,7 @@
     var numPetals = 4;
     for (var i = 0; i < numPetals; i++) {
       var ang = f.a0 + i * (Math.PI / 2) + 0.04 * Math.sin(time * 1.6 + i);
-      var L = R * 1.18;
+      var L = R * 1.15;
       var w = L * 0.74;
 
       octx.save();
@@ -360,10 +348,10 @@
       octx.bezierCurveTo(L * 0.85, w * 0.85, L * 0.35, w * 1.1, 0, 0);
 
       var g = octx.createRadialGradient(0, 0, L * 0.08, 0, 0, L);
-      g.addColorStop(0, '#090204'); // Čierna báza lupienka maku
+      g.addColorStop(0, '#090204');
       g.addColorStop(0.20, '#450a0a');
-      g.addColorStop(0.65, '#dc2626'); // Sýta maková červená
-      g.addColorStop(1.0, '#f87171');  // Svetlý koralový okraj
+      g.addColorStop(0.65, '#dc2626');
+      g.addColorStop(1.0, '#f87171');
       octx.fillStyle = g;
       octx.fill();
 
@@ -376,7 +364,6 @@
       octx.restore();
     }
 
-    // Makovica a tyčinky
     octx.fillStyle = '#0a120b';
     octx.beginPath();
     octx.arc(0, 0, R * 0.20, 0, Math.PI * 2);
@@ -394,19 +381,17 @@
   }
 
   /* -------------------------------------------------------------
-     4. POĽNÁ MARGARÉTA / RUMANČEK (Daisy)
-     - 16 bielych lupeňov s ostrými separačnými hranami
-     - Klenutý žltý terčík
+     4. POĽNÁ MARGARÉTA (Daisy)
   ------------------------------------------------------------- */
   function drawDaisy(octx, f, b, time) {
     var R = f.r * b;
     if (R <= 0.001) return;
 
-    var petalCount = 16;
+    var petalCount = 14;
     for (var i = 0; i < petalCount; i++) {
       var ang = f.a0 + i * (Math.PI * 2 / petalCount) + 0.02 * Math.sin(time * 1.4 + i);
       var L = R;
-      var w = L * 0.16;
+      var w = L * 0.17;
 
       octx.save();
       octx.rotate(ang);
@@ -417,9 +402,9 @@
       octx.quadraticCurveTo(L * 0.5, w, R * 0.20, 0);
 
       var g = octx.createLinearGradient(0, 0, L, 0);
-      g.addColorStop(0, '#64748b'); // Tieň pri báze
+      g.addColorStop(0, '#64748b');
       g.addColorStop(0.35, '#f1f5f9');
-      g.addColorStop(1, '#ffffff'); // Čistá biela
+      g.addColorStop(1, '#ffffff');
       octx.fillStyle = g;
       octx.fill();
 
@@ -432,7 +417,6 @@
       octx.restore();
     }
 
-    // Žltý terčík
     var dg = octx.createRadialGradient(0, 0, 0, 0, 0, R * 0.28);
     dg.addColorStop(0, '#b45309');
     dg.addColorStop(0.65, '#eab308');
@@ -447,14 +431,14 @@
      5. LEVANDUĽA (Lavandula Spike)
   ------------------------------------------------------------- */
   function drawLavender(octx, f, b, time) {
-    var L = f.r * b * 3.0;
+    var L = f.r * b * 2.8;
     if (L <= 0.002) return;
 
-    var tiers = 7;
+    var tiers = 6;
     for (var tier = 0; tier < tiers; tier++) {
       var ty = -L * (tier / (tiers - 1));
       var floretCount = 4 + (tier % 2);
-      var tierWidth = f.r * b * (0.42 - tier * 0.03);
+      var tierWidth = f.r * b * (0.40 - tier * 0.03);
 
       for (var fl = 0; fl < floretCount; fl++) {
         var side = (fl % 2 === 0) ? -1 : 1;
@@ -488,7 +472,7 @@
      6. PUK (Bud)
   ------------------------------------------------------------- */
   function drawBud(octx, f, b, time) {
-    var L = f.r * b * 2.2;
+    var L = f.r * b * 2.1;
     var w = L * 0.24;
     var sp = f.spread || 0.22;
     var angs = [-sp, sp, 0];
@@ -527,8 +511,6 @@
 
   /* -------------------------------------------------------------
      7. PREPRACOVANÉ BOTANICKÉ LISTY
-     - Klenuté listy do strán s negatívnym priestorom
-     - Výrazná stredová a bočná žilnatina
   ------------------------------------------------------------- */
   function drawSunflowerLeaf(octx, L, T, time, wind, flowerRef) {
     var g = eo(clamp((T - L.d) / 1.3));
@@ -561,7 +543,6 @@
     octx.lineWidth = 0.003;
     octx.stroke();
 
-    // Stredová žila
     octx.beginPath();
     octx.moveTo(0, 0);
     octx.lineTo(0, len * 0.90);
@@ -570,7 +551,6 @@
     octx.lineWidth = 0.0026;
     octx.stroke();
 
-    // Bočné žilky
     var veinCount = 3;
     for (var v = 1; v <= veinCount; v++) {
       var vy = len * (v / (veinCount + 1));

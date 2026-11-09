@@ -87,34 +87,34 @@
       var vw = window.innerWidth;
       var vh = window.innerHeight;
 
-      // Zistenie pomeru strán zariadenia
-      var isPortrait = (vh > vw * 1.15);
+      // Zistenie orientácie zariadenia
+      var isPortrait = (vh >= vw);
 
-      // Na mobile: kytica má vyšší vertikálny profil (Hu ≈ 1.48 - 1.62) a vyplní celú výšku displeja
-      // Na PC / desktope: kytica má harmonický proporčný profil (Hu ≈ 1.36) a vyplní 96% výšky
-      Hu = isPortrait ? Math.min(1.65, Math.max(1.46, (vh / vw) * 0.76)) : 1.36;
-
-      var maxW = vw * (isPortrait ? 0.98 : 0.96);
-      var maxH = vh * (isPortrait ? 0.98 : 0.96);
-
-      if (maxW * Hu <= maxH) {
-        Wd = maxW;
-        Hd = Wd * Hu;
+      if (isPortrait) {
+        // Na mobile: plátno natívne vyplní celú obrazovku bez zbytočných čiernych okrajov
+        Wd = vw;
+        Hd = vh;
       } else {
-        Hd = maxH;
-        Wd = Hd / Hu;
+        // Na PC / desktope (landscape): majestátny vertikálny profil vycentrovaný na displeji
+        Hd = vh * 0.95;
+        Wd = Math.min(vw * 0.95, Hd / 1.36);
       }
 
       cols = TARGET_COLS;
-      fs = Wd / cols / 0.6;
-      ctx.font = '500 ' + fs + 'px ' + MONO;
-      var m = ctx.measureText('M').width;
-      cw = m > 0 ? m : fs * 0.6;
-      ch = fs * 1.2;
+      var targetCw = Wd / cols;
+
+      // Zistenie reálneho pomeru šírky písma pre presné zarovnanie na okraje obrazovky
+      ctx.font = '500 50px ' + MONO;
+      var testM = ctx.measureText('M').width;
+      var fontRatio = (testM > 0) ? (testM / 50) : 0.55;
+
+      fs = targetCw / fontRatio;
+      cw = targetCw;
+      ch = fs * 1.20;
 
       // Presné zarovnanie na mriežku
       Wd = cols * cw;
-      rows = Math.max(20, Math.round(Hd / ch));
+      rows = Math.max(24, Math.round(Hd / ch));
       Hd = rows * ch;
       Hu = Hd / Wd;
 
@@ -135,12 +135,12 @@
         hashes[i] = BotanicEngine.hash(i);
       }
 
-      // Prestavba kytice s prispôsobenou dĺžkou stoniek pre daný displej
+      // Prestavba kytice s adaptívnou výškou presne pre tento displej
       bouquet = BouquetScene.buildBouquet(currentSeed, Hu);
     }
 
     function render(time, T, extraWind) {
-      BouquetScene.renderBouquetScene(octx, bouquet, T, time, SW, SH, Hu, extraWind);
+      BouquetScene.renderBouquetScene(octx, bouquet, T, time, SW, SH, Hu, extraWind, cw, ch);
 
       renderer.renderAscii(octx, ctx, {
         SW: SW,
@@ -242,10 +242,10 @@
 
     layout();
 
-    if (document.fonts && document.fonts.load) {
-      document.fonts.load('500 12px "JetBrains Mono"').then(function () {
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () {
         layout();
-      }, function () {});
+      });
     }
 
     if (reduce) {
