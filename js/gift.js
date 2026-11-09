@@ -21,13 +21,20 @@
     var inputFrom = options.inputFrom;
     var toast = options.toast;
 
+    function sanitizeText(str, maxLen) {
+      if (typeof str !== 'string') return '';
+      // Odstránenie riadiacich znakov zabraňuje poškodeniu rozloženia a DOM injekciám
+      var clean = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
+      return (clean.length > maxLen) ? clean.slice(0, maxLen) : clean;
+    }
+
     function getParams() {
       try {
         var params = new URLSearchParams(window.location.search);
         return {
-          to: params.get('to') || '',
-          msg: params.get('msg') || '',
-          from: params.get('from') || ''
+          to: sanitizeText(params.get('to') || '', 50),
+          msg: sanitizeText(params.get('msg') || '', 160),
+          from: sanitizeText(params.get('from') || '', 50)
         };
       } catch (e) {
         return { to: '', msg: '', from: '' };
@@ -63,9 +70,9 @@
 
     function copyShareLink() {
       var url = new URL(window.location.href);
-      var toVal = inputTo ? inputTo.value.trim() : '';
-      var msgVal = inputMsg ? inputMsg.value.trim() : '';
-      var fromVal = inputFrom ? inputFrom.value.trim() : '';
+      var toVal = inputTo ? sanitizeText(inputTo.value, 50) : '';
+      var msgVal = inputMsg ? sanitizeText(inputMsg.value, 160) : '';
+      var fromVal = inputFrom ? sanitizeText(inputFrom.value, 50) : '';
 
       if (toVal) url.searchParams.set('to', toVal); else url.searchParams.delete('to');
       if (msgVal) url.searchParams.set('msg', msgVal); else url.searchParams.delete('msg');

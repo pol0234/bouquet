@@ -24,6 +24,11 @@ const server = http.createServer((req, res) => {
   if (pathname === '/') pathname = '/index.html';
 
   const filePath = path.join(projectRoot, pathname);
+  if (!filePath.startsWith(projectRoot)) {
+    res.statusCode = 403;
+    res.end('Forbidden');
+    return;
+  }
   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
     const ext = path.extname(filePath).toLowerCase();
     res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
