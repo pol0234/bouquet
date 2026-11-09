@@ -1,4 +1,8 @@
 node_modules/
 .DS_Store
 Thumbs.db
+*.png
+*.jpg
+*.jpeg
+*.log
 

@@ -56,8 +56,8 @@ server.listen(PORT, async () => {
   }
 
   try {
-    const shotDesktop = path.join(projectRoot, 'shot_desktop.png');
-    const shotIphone = path.join(projectRoot, 'shot_mobile_iphone.png');
+    const shotDesktop = path.join(os.tmpdir(), `shot_desktop_${Date.now()}.png`);
+    const shotIphone = path.join(os.tmpdir(), `shot_mobile_iphone_${Date.now()}.png`);
 
     console.log('[AUDIT] Capturing Desktop 16:9 (1440x900)...');
     await takeShot(1440, 900, shotDesktop);
@@ -66,6 +66,11 @@ server.listen(PORT, async () => {
     console.log('[AUDIT] Capturing iPhone 14 Pro (393x852)...');
     await takeShot(393, 852, shotIphone);
     console.log(`[PASS] iPhone screenshot: ${shotIphone} (${fs.statSync(shotIphone).size} bytes)`);
+
+    try {
+      if (fs.existsSync(shotDesktop)) fs.unlinkSync(shotDesktop);
+      if (fs.existsSync(shotIphone)) fs.unlinkSync(shotIphone);
+    } catch (e) {}
 
     server.close();
     console.log('[SUCCESS] All pure canvas responsive tests passed!');
