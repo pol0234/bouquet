@@ -21,12 +21,13 @@
   var mulberry32 = BotanicEngine.mulberry32;
   var LEAF_COL = BotanicEngine.LEAF_COL;
 
-  function buildBouquet(seed, Hu) {
+  function buildBouquet(seed, Hu, opts) {
     var rnd = mulberry32(seed || 5521);
     Hu = (Hu && Hu > 0.8) ? Hu : 1.36;
 
-    // Kotva spodku kytice tesne nad spodným okrajom obrazovky
-    var baseBy = Hu - 0.04;
+    // Kotva spodku kytice: štandardne tesne nad spodným okrajom.
+    // opts.bleed (mobil na výšku): stonky sa zbiehajú presne na okraji obrazovky, kytica rastie priamo z displeja.
+    var baseBy = (opts && opts.bleed) ? Hu + 0.01 : Hu - 0.04;
 
     // Vertikálne rozloženie je škálované priamo podľa pomeru displeja Hu.
     // Na mobile (Hu ~ 2.16) kvety prirodzene vyplnia výšku od 0.20 do 1.55.

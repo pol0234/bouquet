@@ -59,7 +59,7 @@ Kým je zapnutá branch, na adrese beží táto verzia. Jediný viditeľný rozd
 - [ ] V karte prehliadača je nová ikonka so semienkami
 - [ ] „Pridať na plochu“ ukáže ikonku so semienkami (nie screenshot stránky) a názov `<3`
 - [ ] Appka z plochy sa otvorí bez lišty Safari, čierne pozadie po celej obrazovke
-- [ ] Celá kytica je vidno: kvety nie sú pod výrezom hore a stonky nekončia odrezané pri lište Safari / domovskej lište
+- [ ] Kvety nie sú pod výrezom hore a stonky rastú priamo zo spodného okraja displeja (bez čiernej medzery)
 - [ ] (Test B) Režim lietadlo → appka z plochy sa aj tak otvorí
 - [ ] (Android, Chrome) menu ⋮ → **Inštalovať aplikáciu** / **Pridať na plochu**
 
@@ -72,8 +72,8 @@ Prípadne skús pridať stránku na plochu zo súkromnej karty.
 Otvor stránku s `?debug=1` na konci adresy (napr. `…/bouquet/?debug=1`). Vľavo hore sa ukážu namerané rozmery
 obrazovky, bezpečné okraje (výrez, domovská lišta) a či beží ako appka z plochy. Urob screenshot a pošli ho.
 
-Kytica sa kreslí len vo vnútri bezpečnej zóny: hore pod výrezom/Dynamic Islandom, dole nad domovskou lištou
-a lištou Safari, s malou medzerou. Čierne pozadie ide cez celú obrazovku.
+Na mobile na výšku kytica začína hore pod výrezom/Dynamic Islandom a stonky rastú priamo zo spodného okraja
+displeja. Na šírku a na PC je kytica vycentrovaná. Čierne pozadie ide vždy cez celú obrazovku.
 
 ### Ikonka
 

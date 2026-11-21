@@ -101,7 +101,8 @@
 
     var currentSeed = 7731;
     var Hu = 1.36;
-    var bouquet = BouquetScene.buildBouquet(currentSeed, Hu);
+    var bouquetOpts = { bleed: false };
+    var bouquet = BouquetScene.buildBouquet(currentSeed, Hu, bouquetOpts);
 
     var cols = TARGET_COLS, rows = 0, cw = 0, ch = 0, fs = 0;
     var Wd = 0, Hd = 0, SW = 0, SH = 0, dpr = 1;
@@ -161,6 +162,7 @@
       var vh = vp.h;
       var isPortrait = (vh >= vw);
       var ins = safeInsets();
+      bouquetOpts.bleed = isPortrait;
 
       ctx.font = '500 50px ' + MONO;
       var testM = ctx.measureText('M').width;
@@ -177,12 +179,11 @@
         ch = fs * 1.20;
         rows = Math.max(24, Math.round(vh / ch));
         ch = vh / rows;
-        // Kytica len v bezpečnej zóne: hore pod výrezom, dole nad domovskou lištou
-        // + malý vzduch, aby stonky nekončili natesno pri lište Safari
+        // Hore kytica začína pod výrezom / Dynamic Islandom.
+        // Dole žiadna rezerva: stonky rastú priamo zo spodného okraja displeja (aj pod domovskou lištou).
         var topRows = Math.ceil(ins.top / ch);
-        var bottomRows = Math.ceil((ins.bottom + Math.max(ch * 1.5, vh * 0.02)) / ch);
         rowOffset = topRows;
-        bouquetRows = Math.max(20, rows - topRows - bottomRows);
+        bouquetRows = Math.max(20, rows - topRows);
         Hu = (bouquetRows * ch) / (cols * cw);
       } else {
         // Desktop / PC (Landscape): majestátna kytica vycentrovaná v strede širokouhlého monitora
@@ -234,7 +235,7 @@
         hashes[i] = BotanicEngine.hash(i);
       }
 
-      bouquet = BouquetScene.buildBouquet(currentSeed, Hu);
+      bouquet = BouquetScene.buildBouquet(currentSeed, Hu, bouquetOpts);
 
       var standalone = window.navigator.standalone === true ||
         (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
@@ -304,7 +305,7 @@
       t0 = now;
       forcedBloom = false;
       currentSeed = Math.floor(Math.random() * 100000);
-      bouquet = BouquetScene.buildBouquet(currentSeed, Hu);
+      bouquet = BouquetScene.buildBouquet(currentSeed, Hu, bouquetOpts);
     }
 
     // Kliknutie myšou na PC
