@@ -132,13 +132,18 @@
        berieme najmenšiu, aby spodok kytice nikdy neskončil pod lištou (pozadie pod plátnom má rovnakú farbu). */
     function viewportSize() {
       var w = window.innerWidth, h = window.innerHeight;
+      var scr = window.screen;
+      if (window.navigator.standalone === true && scr && scr.width > 0 && scr.height > 0) {
+        var shortSide = Math.min(scr.width, scr.height), longSide = Math.max(scr.width, scr.height);
+        var portrait = h >= w;
+        var sw = portrait ? shortSide : longSide, sh = portrait ? longSide : shortSide;
+        if (Math.abs(w - sw) <= 2) return { w: sw, h: Math.max(h, sh) };
+      }
       var vv = window.visualViewport;
       if (vv && vv.height > 0) {
         w = Math.min(w, Math.round(vv.width));
         h = Math.min(h, Math.round(vv.height));
       }
-      var de = document.documentElement;
-      if (de && de.clientHeight > 0) h = Math.min(h, de.clientHeight);
       return { w: w, h: h };
     }
 
@@ -243,6 +248,7 @@
         'inner    ' + window.innerWidth + ' x ' + window.innerHeight,
         'visualVP ' + (window.visualViewport ? Math.round(window.visualViewport.width) + ' x ' + Math.round(window.visualViewport.height) : '-'),
         'client   ' + document.documentElement.clientWidth + ' x ' + document.documentElement.clientHeight,
+        'screen   ' + (window.screen ? window.screen.width + ' x ' + window.screen.height : '-'),
         'použité  ' + vw + ' x ' + vh + '  dpr ' + dpr,
         'insets   t' + ins.top + ' r' + ins.right + ' b' + ins.bottom + ' l' + ins.left,
         'riadky   ' + rows + '  kytica ' + bouquetRows + '  od ' + rowOffset,
