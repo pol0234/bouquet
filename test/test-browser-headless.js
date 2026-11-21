@@ -115,8 +115,11 @@ server.listen(PORT, async () => {
       assert(dumpOutput.includes('<canvas id="art"'), 'Canvas element is present in DOM');
       assert(!dumpOutput.includes('<button'), 'Pure index.html must have zero buttons');
       assert(!dumpOutput.includes('<nav'), 'Pure index.html must have zero navigation bars');
-      assert(dumpOutput.includes('rel="icon"') && dumpOutput.includes('image/svg+xml'), 'Favicon must be configured with SVG data URI');
-      console.log('[PASS] Browser headless DOM dump verified pure canvas structure, zero buttons, and SVG favicon!');
+      assert(dumpOutput.includes('rel="icon"') && dumpOutput.includes('assets/icons/favicon-32.png'), 'Favicon must point to the PNG icon');
+      assert(dumpOutput.includes('rel="apple-touch-icon"'), 'apple-touch-icon must be present for iOS home screen');
+      assert(dumpOutput.includes('rel="manifest"') && dumpOutput.includes('manifest.webmanifest'), 'Web app manifest must be linked');
+      assert(dumpOutput.includes('apple-mobile-web-app-title') && dumpOutput.includes('content="&lt;3"'), 'Home screen title must be "<3"');
+      console.log('[PASS] Browser headless DOM dump verified pure canvas structure, zero buttons, and PWA icons/manifest!');
 
       // Also test gallery dedication page
       const galleryUrl = `http://localhost:${PORT}/gallery.html?to=Anna&msg=Krasny+den&from=Peter`;

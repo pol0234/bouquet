@@ -6,7 +6,9 @@
   "scripts": {
     "test": "node test/test-sunflower.js && node test/test-botanic.js && node test/test-ascii-render.js && node test/test-particles.js && node test/test-bouquet.js && node test/test-browser-headless.js && node test/test-browser-cdp.js",
     "test:unit": "node test/test-sunflower.js && node test/test-botanic.js && node test/test-ascii-render.js && node test/test-particles.js && node test/test-bouquet.js",
-    "test:browser": "node test/test-browser-headless.js && node test/test-browser-cdp.js"
+    "test:browser": "node test/test-browser-headless.js && node test/test-browser-cdp.js",
+    "serve": "node scripts/serve.js",
+    "icons": "node scripts/generate-icons.js"
   },
   "keywords": [
     "ascii-art",

@@ -6,4 +6,5 @@ Thumbs.db
 *.jpeg
 *.log
 !assets/og-preview.png
+!assets/icons/*.png
 
