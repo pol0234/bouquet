@@ -101,7 +101,7 @@
 
     var currentSeed = 7731;
     var Hu = 1.36;
-    var bouquetOpts = { bleed: false };
+    var bouquetOpts = { bleed: true };
     var bouquet = BouquetScene.buildBouquet(currentSeed, Hu, bouquetOpts);
 
     var cols = TARGET_COLS, rows = 0, cw = 0, ch = 0, fs = 0;
@@ -163,7 +163,6 @@
       var vh = vp.h;
       var isPortrait = (vh >= vw);
       var ins = safeInsets();
-      bouquetOpts.bleed = isPortrait;
 
       ctx.font = '500 50px ' + MONO;
       var testM = ctx.measureText('M').width;
@@ -184,7 +183,7 @@
         bouquetRows = Math.max(20, rows - topRows);
         Hu = (bouquetRows * ch) / (cols * cw);
       } else {
-        var availH = Math.max(vh * 0.5, vh - ins.top - ins.bottom);
+        var availH = Math.max(vh * 0.5, vh - ins.top);
         var targetBouquetH = availH * 0.92;
         var targetBouquetW = targetBouquetH / 1.36;
         var approxCw = targetBouquetW / TARGET_COLS;
@@ -198,7 +197,7 @@
         bouquetRows = Math.max(24, Math.min(rows, Math.round(targetBouquetH / ch)));
         Hu = (bouquetRows * ch) / (bouquetCols * cw);
         colOffset = Math.max(0, Math.floor((cols - bouquetCols) / 2));
-        rowOffset = Math.max(0, Math.round((ins.top + (availH - bouquetRows * ch) / 2) / ch));
+        rowOffset = Math.max(Math.ceil(ins.top / ch), rows - bouquetRows);
       }
 
       Wd = vw;
