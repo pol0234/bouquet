@@ -24,9 +24,9 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
-  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png?v=2">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png?v=2">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png?v=2">
   <meta name="theme-color" content="#030205">
   <meta name="application-name" content="&lt;3">
   <meta name="mobile-web-app-capable" content="yes">
@@ -110,11 +110,57 @@
     var t0 = performance.now(), frameNo = 0;
     var targetWind = 0, currentMouseWind = 0;
 
-    /* Nativny responsivny layout - 100% fullscreen celistva plocha bez vyrezov na mobile aj PC */
+    /* Bezpečné okraje z CSS env(): výrez / Dynamic Island hore, domovská lišta dole (iPhone, appka z plochy) */
+    var insetProbe = document.createElement('div');
+    insetProbe.setAttribute('aria-hidden', 'true');
+    insetProbe.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;' +
+      'padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)';
+    document.body.appendChild(insetProbe);
+
+    function safeInsets() {
+      var cs = window.getComputedStyle(insetProbe);
+      return {
+        top: parseFloat(cs.paddingTop) || 0,
+        right: parseFloat(cs.paddingRight) || 0,
+        bottom: parseFloat(cs.paddingBottom) || 0,
+        left: parseFloat(cs.paddingLeft) || 0
+      };
+    }
+
+    /* Skutočne viditeľná plocha. Na iPhone sa innerHeight, visualViewport a clientHeight líšia podľa lišty Safari;
+       berieme najmenšiu, aby spodok kytice nikdy neskončil pod lištou (pozadie pod plátnom má rovnakú farbu). */
+    function viewportSize() {
+      var w = window.innerWidth, h = window.innerHeight;
+      var vv = window.visualViewport;
+      if (vv && vv.height > 0) {
+        w = Math.min(w, Math.round(vv.width));
+        h = Math.min(h, Math.round(vv.height));
+      }
+      var de = document.documentElement;
+      if (de && de.clientHeight > 0) h = Math.min(h, de.clientHeight);
+      return { w: w, h: h };
+    }
+
+    var debugEl = null;
+    function showDebug(info) {
+      if (!/[?&]debug(?:[=&]|$)/.test(window.location.search)) return;
+      if (!debugEl) {
+        debugEl = document.createElement('pre');
+        debugEl.style.cssText = 'position:fixed;left:8px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:9;margin:0;' +
+          'padding:6px 8px;font:11px/1.4 ui-monospace,Menlo,monospace;color:#fbf6e2;background:rgba(0,0,0,.75);' +
+          'border:1px solid #444;border-radius:6px;pointer-events:none;white-space:pre';
+        document.body.appendChild(debugEl);
+      }
+      debugEl.textContent = info;
+    }
+
+    /* Nativny responsivny layout - pozadie cez celú obrazovku, kytica v bezpečnej zóne na mobile aj PC */
     function layout() {
-      var vw = window.innerWidth;
-      var vh = window.innerHeight;
+      var vp = viewportSize();
+      var vw = vp.w;
+      var vh = vp.h;
       var isPortrait = (vh >= vw);
+      var ins = safeInsets();
 
       ctx.font = '500 50px ' + MONO;
       var testM = ctx.measureText('M').width;
@@ -131,12 +177,18 @@
         ch = fs * 1.20;
         rows = Math.max(24, Math.round(vh / ch));
         ch = vh / rows;
-        bouquetRows = rows;
-        Hu = (rows * ch) / (cols * cw);
+        // Kytica len v bezpečnej zóne: hore pod výrezom, dole nad domovskou lištou
+        // + malý vzduch, aby stonky nekončili natesno pri lište Safari
+        var topRows = Math.ceil(ins.top / ch);
+        var bottomRows = Math.ceil((ins.bottom + Math.max(ch * 1.5, vh * 0.02)) / ch);
+        rowOffset = topRows;
+        bouquetRows = Math.max(20, rows - topRows - bottomRows);
+        Hu = (bouquetRows * ch) / (cols * cw);
       } else {
         // Desktop / PC (Landscape): majestátna kytica vycentrovaná v strede širokouhlého monitora
         // Kytica zaberá elegantných ~92% výšky obrazovky bez akýchkoľvek okrajov či výrezov
-        var targetBouquetH = vh * 0.92;
+        var availH = Math.max(vh * 0.5, vh - ins.top - ins.bottom);
+        var targetBouquetH = availH * 0.92;
         var targetBouquetW = targetBouquetH / 1.36;
         var approxCw = targetBouquetW / TARGET_COLS;
         cols = Math.max(TARGET_COLS, Math.round(vw / approxCw));
@@ -149,7 +201,7 @@
         bouquetRows = Math.max(24, Math.min(rows, Math.round(targetBouquetH / ch)));
         Hu = (bouquetRows * ch) / (bouquetCols * cw);
         colOffset = Math.max(0, Math.floor((cols - bouquetCols) / 2));
-        rowOffset = Math.max(0, Math.floor((rows - bouquetRows) / 2));
+        rowOffset = Math.max(0, Math.round((ins.top + (availH - bouquetRows * ch) / 2) / ch));
       }
 
       Wd = vw;
@@ -183,6 +235,18 @@
       }
 
       bouquet = BouquetScene.buildBouquet(currentSeed, Hu);
+
+      var standalone = window.navigator.standalone === true ||
+        (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+      showDebug([
+        'inner    ' + window.innerWidth + ' x ' + window.innerHeight,
+        'visualVP ' + (window.visualViewport ? Math.round(window.visualViewport.width) + ' x ' + Math.round(window.visualViewport.height) : '-'),
+        'client   ' + document.documentElement.clientWidth + ' x ' + document.documentElement.clientHeight,
+        'použité  ' + vw + ' x ' + vh + '  dpr ' + dpr,
+        'insets   t' + ins.top + ' r' + ins.right + ' b' + ins.bottom + ' l' + ins.left,
+        'riadky   ' + rows + '  kytica ' + bouquetRows + '  od ' + rowOffset,
+        'appka    ' + (standalone ? 'áno (z plochy)' : 'nie (prehliadač)')
+      ].join('\n'));
     }
 
     function render(time, T, extraWind) {
@@ -297,6 +361,13 @@
         layout();
       });
     }
+    // iOS pri otočení a pri návrate na stránku hlási rozmery s oneskorením
+    window.addEventListener('orientationchange', function () {
+      setTimeout(layout, 300);
+    });
+    window.addEventListener('pageshow', function () {
+      layout();
+    });
 
     layout();
 

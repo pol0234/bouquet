@@ -5,7 +5,7 @@
  *  - offline: appka z plochy sa otvorí z poslednej uloženej kópie
  * Cudzie domény (Google Fonts) sa nechávajú prehliadaču – offline sa použije záložný mono font.
  */
-var CACHE = 'bouquet-v1';
+var CACHE = 'bouquet-v2';
 var CORE = [
   './',
   'index.html',

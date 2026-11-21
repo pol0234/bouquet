@@ -23,7 +23,7 @@ npm test
 
 ## Appka na ploche mobilu (PWA) – experimentálne
 
-Stránka sa dá pridať na plochu ako appka: bez lišty prehliadača, s ikonkou `<3` a s názvom `<3`.
+Stránka sa dá pridať na plochu ako appka: bez lišty prehliadača, s ikonkou slnečnicových semienok (Fibonacci) a s názvom `<3`.
 Rovnaká ikonka je aj v karte prehliadača.
 
 | Súbor | Na čo je |
@@ -39,7 +39,7 @@ Rovnaká ikonka je aj v karte prehliadača.
 1. Na PC: `npm run serve`, vypíše adresu typu `http://192.168.x.x:8080/`.
    Ak Windows ukáže okno firewallu, povoľ **súkromné siete**.
 2. Na iPhone (rovnaká Wi-Fi) otvor túto adresu v **Safari**.
-3. **Zdieľať → Pridať na plochu**: v náhľade má byť zlaté `<3` a názov `<3`.
+3. **Zdieľať → Pridať na plochu**: v náhľade majú byť krémové bodky (semienka) a názov `<3`.
 4. Otvor appku z plochy.
 
 Takto sa dá overiť ikonka, názov aj režim bez lišty. Offline režim sa takto neotestuje:
@@ -56,11 +56,10 @@ Kým je zapnutá branch, na adrese beží táto verzia. Jediný viditeľný rozd
 
 ### Čo skontrolovať
 
-- [ ] V karte prehliadača je nová ikonka `<3`
-- [ ] „Pridať na plochu“ ukáže ikonku `<3` (nie screenshot stránky) a názov `<3`
+- [ ] V karte prehliadača je nová ikonka so semienkami
+- [ ] „Pridať na plochu“ ukáže ikonku so semienkami (nie screenshot stránky) a názov `<3`
 - [ ] Appka z plochy sa otvorí bez lišty Safari, čierne pozadie po celej obrazovke
-- [ ] Kvety nie sú schované pod výrezom/Dynamic Islandom. Ak sú, v HTML zmeň
-      `apple-mobile-web-app-status-bar-style` z `black-translucent` na `black`
+- [ ] Celá kytica je vidno: kvety nie sú pod výrezom hore a stonky nekončia odrezané pri lište Safari / domovskej lište
 - [ ] (Test B) Režim lietadlo → appka z plochy sa aj tak otvorí
 - [ ] (Android, Chrome) menu ⋮ → **Inštalovať aplikáciu** / **Pridať na plochu**
 
@@ -68,12 +67,21 @@ Kým je zapnutá branch, na adrese beží táto verzia. Jediný viditeľný rozd
 v *Nastavenia → Safari → Pokročilé → Údaje webových stránok* odstráň `github.io` (alebo IP adresu PC).
 Prípadne skús pridať stránku na plochu zo súkromnej karty.
 
-### Iná ikonka
+### Keď kytica stále nesedí na obrazovku
+
+Otvor stránku s `?debug=1` na konci adresy (napr. `…/bouquet/?debug=1`). Vľavo hore sa ukážu namerané rozmery
+obrazovky, bezpečné okraje (výrez, domovská lišta) a či beží ako appka z plochy. Urob screenshot a pošli ho.
+
+Kytica sa kreslí len vo vnútri bezpečnej zóny: hore pod výrezom/Dynamic Islandom, dole nad domovskou lištou
+a lištou Safari, s malou medzerou. Čierne pozadie ide cez celú obrazovku.
+
+### Ikonka
+
+Semienka slnečnice rozložené zlatým uhlom (rovnaká fylotaxia ako v kytici), krémové na čiernom.
+Pre malý favicon v karte sa kreslí menej a väčších bodiek, aby nesplynuli.
 
 ```bash
-npm run icons                           # predvolené: zlaté <3
-node scripts/generate-icons.js --variant=heart-ink   # krémové <3
-node scripts/generate-icons.js --variant=star        # ASCII hviezdička / kvet
-node scripts/generate-icons.js --variant=flower      # pôvodná kvetinová silueta
+npm run icons     # znova vygeneruje všetky ikonky v assets/icons/
 ```
-Na generovanie treba Google Chrome a internet (načíta sa font JetBrains Mono).
+Na generovanie treba Google Chrome. Po zmene ikoniek zvýš `?v=2` v HTML a v `manifest.webmanifest`,
+inak si iPhone môže pamätať starú.
