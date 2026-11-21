@@ -136,12 +136,14 @@
         var sw = portrait ? shortSide : longSide, sh = portrait ? longSide : shortSide;
         if (Math.abs(w - sw) <= 2) return { w: sw, h: Math.max(h, sh) };
       }
-      var vv = window.visualViewport;
-      if (vv && vv.height > 0) {
-        w = Math.min(w, Math.round(vv.width));
-        h = Math.min(h, Math.round(vv.height));
-      }
       return { w: w, h: h };
+    }
+
+    var lastSizeKey = '';
+    function sizeKey() {
+      var vp = viewportSize();
+      var ins = safeInsets();
+      return vp.w + 'x' + vp.h + '|' + ins.top + ',' + ins.right + ',' + ins.bottom + ',' + ins.left;
     }
 
     var debugEl = null;
@@ -158,6 +160,7 @@
     }
 
     function layout() {
+      lastSizeKey = sizeKey();
       var vp = viewportSize();
       var vw = vp.w;
       var vh = vp.h;
@@ -285,6 +288,7 @@
 
       currentMouseWind += (targetWind - currentMouseWind) * 0.06;
 
+      if (sizeKey() !== lastSizeKey) layout();
       render(time, T, currentMouseWind);
       requestAnimationFrame(frame);
     }
@@ -341,20 +345,25 @@
       }
     }, { passive: true });
 
-    window.addEventListener('resize', function () {
+    function relayout() {
       layout();
-    });
+      if (reduce) render(0, 8.0, 0);
+    }
+    function relayoutIfChanged() {
+      if (sizeKey() !== lastSizeKey) relayout();
+    }
+    window.addEventListener('resize', relayout);
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', function () {
-        layout();
-      });
+      window.visualViewport.addEventListener('resize', relayout);
     }
     window.addEventListener('orientationchange', function () {
-      setTimeout(layout, 300);
+      [50, 200, 500, 1000, 2000].forEach(function (ms) { setTimeout(relayoutIfChanged, ms); });
     });
-    window.addEventListener('pageshow', function () {
-      layout();
+    window.addEventListener('pageshow', relayout);
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) relayoutIfChanged();
     });
+    if (reduce) setInterval(relayoutIfChanged, 500);
 
     layout();
 
