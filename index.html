@@ -33,6 +33,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="&lt;3">
+  <script>if (window.navigator.standalone === true || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches)) { document.documentElement.classList.add("app"); }</script>
   <script>if ("serviceWorker" in navigator) { window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); }); }</script>
 
   <style>
@@ -46,7 +47,6 @@
     html, body {
       width: 100%;
       height: 100%;
-      height: 100dvh;
       background: #030205;
       overflow: hidden;
       margin: 0;
@@ -57,12 +57,26 @@
       touch-action: manipulation;
     }
 
+    html.app {
+      height: auto;
+      min-height: 100%;
+      min-height: calc(100% + env(safe-area-inset-top, 0px));
+      min-height: min(100lvh, calc(100% + env(safe-area-inset-top, 0px)));
+    }
+
+    @media (display-mode: standalone) {
+      html {
+        height: auto;
+        min-height: min(100lvh, calc(100% + env(safe-area-inset-top, 0px)));
+      }
+    }
+
     canvas {
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       display: block;
       outline: none;
       border: none;
@@ -129,13 +143,8 @@
 
     function viewportSize() {
       var w = window.innerWidth, h = window.innerHeight;
-      var scr = window.screen;
-      if (window.navigator.standalone === true && scr && scr.width > 0 && scr.height > 0) {
-        var shortSide = Math.min(scr.width, scr.height), longSide = Math.max(scr.width, scr.height);
-        var portrait = h >= w;
-        var sw = portrait ? shortSide : longSide, sh = portrait ? longSide : shortSide;
-        if (Math.abs(w - sw) <= 2) return { w: sw, h: Math.max(h, sh) };
-      }
+      var docH = Math.round(document.documentElement.getBoundingClientRect().height);
+      if (docH > h && docH - h <= 140) h = docH;
       return { w: w, h: h };
     }
 
@@ -242,6 +251,7 @@
         'visualVP ' + (window.visualViewport ? Math.round(window.visualViewport.width) + ' x ' + Math.round(window.visualViewport.height) : '-'),
         'client   ' + document.documentElement.clientWidth + ' x ' + document.documentElement.clientHeight,
         'screen   ' + (window.screen ? window.screen.width + ' x ' + window.screen.height : '-'),
+        'html     ' + Math.round(document.documentElement.getBoundingClientRect().height),
         'použité  ' + vw + ' x ' + vh + '  dpr ' + dpr,
         'insets   t' + ins.top + ' r' + ins.right + ' b' + ins.bottom + ' l' + ins.left,
         'riadky   ' + rows + '  kytica ' + bouquetRows + '  od ' + rowOffset,
@@ -288,7 +298,6 @@
 
       currentMouseWind += (targetWind - currentMouseWind) * 0.06;
 
-      if (sizeKey() !== lastSizeKey) layout();
       render(time, T, currentMouseWind);
       requestAnimationFrame(frame);
     }
@@ -349,21 +358,21 @@
       layout();
       if (reduce) render(0, 8.0, 0);
     }
-    function relayoutIfChanged() {
-      if (sizeKey() !== lastSizeKey) relayout();
+    var pendingKey = '', pendingSince = 0;
+    function checkSize() {
+      var k = sizeKey();
+      var now = performance.now();
+      if (k === lastSizeKey) { pendingKey = ''; return; }
+      if (k !== pendingKey) { pendingKey = k; pendingSince = now; return; }
+      if (now - pendingSince >= 200) relayout();
     }
-    window.addEventListener('resize', relayout);
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', relayout);
-    }
-    window.addEventListener('orientationchange', function () {
-      [50, 200, 500, 1000, 2000].forEach(function (ms) { setTimeout(relayoutIfChanged, ms); });
-    });
-    window.addEventListener('pageshow', relayout);
+    setInterval(checkSize, 100);
+    window.addEventListener('resize', checkSize);
+    window.addEventListener('orientationchange', checkSize);
+    window.addEventListener('pageshow', checkSize);
     document.addEventListener('visibilitychange', function () {
-      if (!document.hidden) relayoutIfChanged();
+      if (!document.hidden) checkSize();
     });
-    if (reduce) setInterval(relayoutIfChanged, 500);
 
     layout();
 
