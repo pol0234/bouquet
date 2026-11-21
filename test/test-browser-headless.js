@@ -74,7 +74,6 @@ server.listen(PORT, async () => {
     }
     console.log('[PASS] All HTTP static endpoints and scripts resolved with HTTP 200');
 
-    // Launch headless Chrome if available
     const chromeCandidates = [
       'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
       'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
@@ -121,7 +120,6 @@ server.listen(PORT, async () => {
       assert(dumpOutput.includes('apple-mobile-web-app-title') && dumpOutput.includes('content="&lt;3"'), 'Home screen title must be "<3"');
       console.log('[PASS] Browser headless DOM dump verified pure canvas structure, zero buttons, and PWA icons/manifest!');
 
-      // Also test gallery dedication page
       const galleryUrl = `http://localhost:${PORT}/gallery.html?to=Anna&msg=Krasny+den&from=Peter`;
       const galleryDump = await new Promise((resolve, reject) => {
         const proc = spawn(browserPath, ['--headless=new', '--disable-gpu', '--no-sandbox', '--dump-dom', galleryUrl]);
@@ -132,7 +130,6 @@ server.listen(PORT, async () => {
       assert(galleryDump.includes('Pre Anna'), 'Gallery page preserves dedication parameter "to=Anna"');
       console.log('[PASS] Gallery dedication page also verified!');
 
-      // Cleanup temp user data
       try {
         fs.rmSync(tempUserData, { recursive: true, force: true });
       } catch (e) {}

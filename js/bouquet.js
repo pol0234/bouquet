@@ -1,6 +1,3 @@
-// js/bouquet.js
-// Bouquet composition, stem updates, wind dynamics, and airy botanical layout
-// Coordinates in normalized space [0, 1] x [0, Hu]
 
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -25,15 +22,9 @@
     var rnd = mulberry32(seed || 5521);
     Hu = (Hu && Hu > 0.8) ? Hu : 1.36;
 
-    // Kotva spodku kytice: štandardne tesne nad spodným okrajom.
-    // opts.bleed (mobil na výšku): stonky sa zbiehajú presne na okraji obrazovky, kytica rastie priamo z displeja.
     var baseBy = (opts && opts.bleed) ? Hu + 0.01 : Hu - 0.04;
 
-    // Vertikálne rozloženie je škálované priamo podľa pomeru displeja Hu.
-    // Na mobile (Hu ~ 2.16) kvety prirodzene vyplnia výšku od 0.20 do 1.55.
-    // Na desktope (Hu ~ 1.36) kvety vyplnia výšku od 0.14 do 0.96.
     var flowers = [
-      // 1. Puky na vrchole kytice (prirodzená výška 12% - 18% výšky)
       createFlower({
         t: 'bud',
         x: 0.48, y: Hu * 0.12,
@@ -59,7 +50,6 @@
         spread: 0.22
       }, 103),
 
-      // 2. Fialové levandule na krídlach (vertikálna elegancia)
       createFlower({
         t: 'lavender',
         x: 0.14, y: Hu * 0.22,
@@ -75,7 +65,6 @@
         c: ['#3b0764', '#9333ea', '#f5d0fe']
       }, 202),
 
-      // 3. Kobaltové nevädze (kontrastné sýto-modré kvety)
       createFlower({
         t: 'cornflower',
         x: 0.29, y: Hu * 0.30,
@@ -91,7 +80,6 @@
         c: ['#0f172a', '#2563eb', '#38bdf8']
       }, 302),
 
-      // 4. Hero slnečnica 2 (horná pravá, orientovaná k svetlu, s vlastným priestorom)
       createFlower({
         t: 'sunflower',
         x: 0.68, y: Hu * 0.32,
@@ -104,7 +92,6 @@
         centerCol: ['#381604', '#652a0a', '#9a3412', '#facc15']
       }, 401),
 
-      // 5. Hero slnečnica 1 (KRÁĽOVNÁ KYTICE: dominantný, veľký, detailný kvet v strede)
       createFlower({
         t: 'sunflower',
         x: 0.46, y: Hu * 0.45,
@@ -117,7 +104,6 @@
         centerCol: ['#381604', '#652a0a', '#9a3412', '#facc15']
       }, 402),
 
-      // 6. Sýtočervený vlčí mak (kontrastný akcent vpravo dole)
       createFlower({
         t: 'poppy',
         x: 0.71, y: Hu * 0.58,
@@ -126,7 +112,6 @@
         c: ['#450a0a', '#dc2626', '#f87171']
       }, 501),
 
-      // 7. Biele lúčne margaréty so zlatým očkom (dolné orámovanie)
       createFlower({
         t: 'daisy',
         x: 0.23, y: Hu * 0.61,
@@ -150,32 +135,26 @@
       }, 603)
     ];
 
-    // Zoradenie hlávok podľa vertikálnej osi Y pre prirodzenú hĺbku
     var headOrder = flowers.slice().sort(function (a, b) {
       return a.y - b.y;
     });
 
-    // Bohaté botanické lístie vytvárajúce prirodzenú siluetu kytice
     var leaves = [
-      // 1. Veľké dominantné listy slnečnice klenúce sa do strán
       { si: 7, tt: 0.32, side: -1, ang: 0.85, len: 0.23, wid: 0.054, ph: 1.1, front: false, c: LEAF_COL[0], d: 0.25 },
       { si: 8, tt: 0.34, side: 1,  ang: 0.88, len: 0.24, wid: 0.054, ph: 2.3, front: false, c: LEAF_COL[1], d: 0.30 },
       { si: 6, tt: 0.44, side: -1, ang: 0.72, len: 0.19, wid: 0.044, ph: 3.5, front: true,  c: LEAF_COL[2], d: 0.38 },
       { si: 9, tt: 0.42, side: 1,  ang: 0.76, len: 0.20, wid: 0.044, ph: 4.7, front: true,  c: LEAF_COL[3], d: 0.22 },
 
-      // 2. Lístky pri horných pukoch (odstraňujú dojem holých tyčiek!)
       { si: 0, tt: 0.48, side: -1, ang: 0.50, len: 0.09, wid: 0.020, ph: 1.5, front: false, c: LEAF_COL[1], d: 0.65 },
       { si: 0, tt: 0.62, side: 1,  ang: 0.55, len: 0.08, wid: 0.018, ph: 2.7, front: true,  c: LEAF_COL[2], d: 0.70 },
       { si: 1, tt: 0.55, side: -1, ang: 0.45, len: 0.08, wid: 0.018, ph: 3.2, front: true,  c: LEAF_COL[0], d: 0.68 },
       { si: 2, tt: 0.52, side: 1,  ang: 0.48, len: 0.08, wid: 0.018, ph: 4.1, front: true,  c: LEAF_COL[3], d: 0.64 },
 
-      // 3. Stredné lístie vypĺňajúce stred kytice
       { si: 5, tt: 0.52, side: -1, ang: 0.60, len: 0.16, wid: 0.038, ph: 0.8, front: false, c: LEAF_COL[1], d: 0.48 },
       { si: 7, tt: 0.58, side: 1,  ang: 0.65, len: 0.16, wid: 0.038, ph: 1.9, front: false, c: LEAF_COL[0], d: 0.45 },
       { si: 3, tt: 0.48, side: -1, ang: 0.52, len: 0.13, wid: 0.030, ph: 2.8, front: true,  c: LEAF_COL[2], d: 0.55 },
       { si: 4, tt: 0.53, side: 1,  ang: 0.56, len: 0.13, wid: 0.030, ph: 3.9, front: true,  c: LEAF_COL[3], d: 0.52 },
 
-      // 4. Spodné framing listy
       { si: 10, tt: 0.20, side: -1, ang: 1.05, len: 0.18, wid: 0.042, ph: 0.4, front: false, c: LEAF_COL[0], d: 0.18 },
       { si: 9,  tt: 0.18, side: 1,  ang: 1.10, len: 0.18, wid: 0.042, ph: 5.1, front: false, c: LEAF_COL[1], d: 0.15 },
       { si: 11, tt: 0.24, side: -1, ang: 0.95, len: 0.16, wid: 0.038, ph: 2.1, front: true,  c: LEAF_COL[2], d: 0.12 },
@@ -213,7 +192,6 @@
 
       var segments = 28;
 
-      // 1. Tmavý separačný tieň okolo každej stonky
       octx.strokeStyle = '#051206';
       octx.lineWidth = f.stemW + 0.0035;
       octx.beginPath();
@@ -224,7 +202,6 @@
       }
       octx.stroke();
 
-      // 2. Hlavné telo stonky
       octx.strokeStyle = f.stemCol;
       octx.lineWidth = f.stemW;
       octx.beginPath();
@@ -235,7 +212,6 @@
       }
       octx.stroke();
 
-      // 3. Pozdĺžny svetelný pás na stonke
       octx.strokeStyle = '#bef264';
       octx.globalAlpha = 0.35;
       octx.lineWidth = f.stemW * 0.32;
@@ -256,9 +232,6 @@
     octx.fillStyle = '#000000';
     octx.fillRect(0, 0, SW, SH);
 
-    // DÔLEŽITÁ MATEMATIKA:
-    // Aby kruh v normalized priestore bol dokonalým kruhom aj na obrazovke,
-    // vertikálne škálovanie v octx MUSÍ rešpektovať pomer písma cw / ch!
     var charAspect = (cw && ch) ? (cw / ch) : 0.5;
     var S_val = (layoutInfo && layoutInfo.S) ? layoutInfo.S : 3;
     var bX = layoutInfo ? (layoutInfo.colOffset * S_val) : 0;
@@ -267,13 +240,11 @@
     var scaleY = bSW * charAspect;
     octx.setTransform(bSW, 0, 0, scaleY, bX, bY);
 
-    // Vánok
     var baseWind = 0.50 * (0.65 + 0.35 * Math.sin(time * 0.37) * Math.sin(time * 0.11 + 1.3));
     var wind = baseWind + (extraWind || 0);
     updateStems(bouquet.flowers, time, wind);
 
     var i;
-    // 1. Zadné listy
     for (i = 0; i < bouquet.leaves.length; i++) {
       var Lb = bouquet.leaves[i];
       if (!Lb.front) {
@@ -281,10 +252,8 @@
       }
     }
 
-    // 2. Stonky (ponechané čisté botanické stonky bez akéhokoľvek viazacieho pásu)
     drawStems(octx, bouquet.flowers, T);
 
-    // 3. Predné listy
     for (i = 0; i < bouquet.leaves.length; i++) {
       var Lf = bouquet.leaves[i];
       if (Lf.front) {
@@ -292,7 +261,6 @@
       }
     }
 
-    // 4. Kvetné hlávky
     for (i = 0; i < bouquet.headOrder.length; i++) {
       drawFlowerHead(octx, bouquet.headOrder[i], T, time);
     }

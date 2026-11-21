@@ -197,10 +197,8 @@
     }
 
     function render(time, T, extraWind) {
-      // 1. Vektorové vykreslenie do miniatúrneho offscreen buffera s interaktívnym vánkom
       BouquetScene.renderBouquetScene(octx, bouquet, T, time, SW, SH, Hu, extraWind, cw, ch);
 
-      // 2. ASCII rasterizácia so supersamplingom a časticami
       activeCount = renderer.renderAscii(octx, ctx, {
         SW: SW,
         SH: SH,
@@ -241,7 +239,6 @@
       var T = (reduce || forcedBloom) ? 6.0 : (now - t0) * 0.001;
       var time = reduce ? 0 : now * 0.001;
 
-      // Plynulá reakcia stoniek na pohyb myši
       currentMouseWind += (targetWind - currentMouseWind) * 0.06;
 
       render(time, T, currentMouseWind);
@@ -251,7 +248,6 @@
         last = now;
       }
 
-      // Automatické zobrazenie kartičky s venovaním po dokončení rozkvitnutia (T > 4.6 s)
       if (!giftShown && T > 4.6) {
         giftShown = true;
         gift.showCard();
@@ -260,7 +256,6 @@
       requestAnimationFrame(frame);
     }
 
-    // Interaktívny fyzikálny vánok myšou a dotykom
     stageEl.addEventListener('mousemove', function (e) {
       var rect = stageEl.getBoundingClientRect();
       var relX = (e.clientX - rect.left) / rect.width - 0.5;
@@ -283,7 +278,6 @@
       targetWind = 0;
     });
 
-    // Uloženie vyrenderovaného ASCII plátna ako PNG
     var btnSavePng = document.getElementById('btnSavePng');
     if (btnSavePng) {
       btnSavePng.addEventListener('click', function () {
@@ -295,7 +289,6 @@
       });
     }
 
-    // Event listenery pre interakciu
     window.addEventListener('resize', function () {
       layout();
       updateInfo();
@@ -335,7 +328,6 @@
       gift.copyShareLink();
     });
 
-    // Spustenie
     layout();
     updateInfo();
 

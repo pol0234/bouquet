@@ -1,11 +1,3 @@
-/**
- * Generuje PWA ikonky (favicon, apple-touch-icon, Android/manifest ikonky).
- * Motív: semená slnečnice rozložené zlatým uhlom (Fibonacci / fylotaxia),
- * krémové bodky na čiernom pozadí stránky.
- *
- * Použitie:  npm run icons   (alebo node scripts/generate-icons.js)
- * Potrebuje Google Chrome (CHROME_PATH, ak je inde).
- */
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -17,13 +9,6 @@ const CHROME = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Applic
 const BG = '#030205';
 const CREAM = '#efe7d6';
 
-/*
- * Fibonacciho semená v súradniciach 0..100.
- * n      = počet bodiek
- * spread = vzdialenosť medzi kruhmi (polomer i-tej bodky je spread * sqrt(i))
- * dot    = [najmenšia, najväčšia] veľkosť bodky (od stredu von)
- * scale  = zmenšenie celého motívu (maskable ikonky musia ostať v strednej "safe zone")
- */
 function phyllotaxis({ n, spread, dot, scale = 1 }) {
   const ga = Math.PI * (3 - Math.sqrt(5));
   let circles = '';
@@ -36,13 +21,11 @@ function phyllotaxis({ n, spread, dot, scale = 1 }) {
   return `<g fill="${CREAM}">${circles}</g>`;
 }
 
-/* Detail podľa veľkosti: pri 32 px by 160 bodiek splynulo, preto menej a väčších. */
 const DETAIL = {
   large: { n: 160, spread: 2.55, dot: [0.55, 1.7] },
   small: { n: 34, spread: 5.6, dot: [1.6, 3.4] }
 };
 
-/* shape: 'square' = plný štvorec (iOS/Android si rohy zaoblia sami), 'rounded' = favicon v karte */
 const OUTPUTS = [
   { file: 'favicon-32.png', size: 32, shape: 'rounded', detail: 'small' },
   { file: 'apple-touch-icon.png', size: 180, shape: 'square', detail: 'large' },

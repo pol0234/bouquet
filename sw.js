@@ -1,10 +1,3 @@
-/*
- * Service worker – "network first":
- *  - online: vždy sa načíta najnovšia verzia z GitHub Pages (žiadne zaseknuté staré verzie),
- *    a zároveň sa uloží kópia do cache
- *  - offline: appka z plochy sa otvorí z poslednej uloženej kópie
- * Cudzie domény (Google Fonts) sa nechávajú prehliadaču – offline sa použije záložný mono font.
- */
 var CACHE = 'bouquet-v2';
 var CORE = [
   './',

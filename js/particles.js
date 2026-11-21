@@ -1,5 +1,3 @@
-// js/particles.js
-// Atmospheric particles: golden sunflower pollen and twinkling background stars
 
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -22,7 +20,6 @@
   function createParticleSystem(seed) {
     var rnd = mulberry32(seed || 3829);
 
-    // 1. Pozadie: ambientné jemné hviezdy / textúry
     var stars = [];
     for (var i = 0; i < 46; i++) {
       stars.push({
@@ -35,7 +32,6 @@
       });
     }
 
-    // 2. Popredie: poletujúci zlatý peľ zo slnečníc
     var pollen = [];
     for (var j = 0; j < 32; j++) {
       pollen.push({
@@ -67,10 +63,9 @@
     function drawForeground(ctx, cols, rows, cw, ch, time) {
       for (var p = 0; p < pollen.length; p++) {
         var pt = pollen[p];
-        // Pomaly stúpajúci peľ s cyklickým návratom
         var py = ((pt.y - time * pt.vy) % 0.85);
         if (py < 0) py += 0.85;
-        py += 0.1; // Udržiavať v oblasti kytice
+        py += 0.1;
 
         var px = pt.x + pt.swayAmp * Math.sin(time * pt.swaySpeed + pt.ph);
         var alpha = pt.alphaBase * (0.6 + 0.4 * Math.sin(time * 3.0 + pt.ph));

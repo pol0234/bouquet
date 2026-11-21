@@ -1,8 +1,3 @@
-/**
- * Jednoduchý lokálny server na test na mobile cez Wi-Fi.
- *   npm run serve        (alebo: node scripts/serve.js 8080)
- * Vypíše adresy, ktoré otvoríš v Safari / Chrome na telefóne (musí byť na rovnakej Wi-Fi).
- */
 const http = require('http');
 const fs = require('fs');
 const path = require('path');

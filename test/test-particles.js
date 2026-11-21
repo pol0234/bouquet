@@ -1,4 +1,3 @@
-// test/test-particles.js
 const assert = require('assert');
 const Particles = require('../js/particles.js');
 
@@ -8,7 +7,6 @@ const ps = Particles.createParticleSystem(1234);
 assert(typeof ps.drawBackground === 'function', 'drawBackground function exists');
 assert(typeof ps.drawForeground === 'function', 'drawForeground function exists');
 
-// Mock 2D canvas context
 const mockCtx = {
   fillTextCalls: 0,
   fillStyle: '',

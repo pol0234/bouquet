@@ -111,7 +111,6 @@
     var t0 = performance.now(), frameNo = 0;
     var targetWind = 0, currentMouseWind = 0;
 
-    /* Bezpečné okraje z CSS env(): výrez / Dynamic Island hore, domovská lišta dole (iPhone, appka z plochy) */
     var insetProbe = document.createElement('div');
     insetProbe.setAttribute('aria-hidden', 'true');
     insetProbe.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;' +
@@ -128,8 +127,6 @@
       };
     }
 
-    /* Skutočne viditeľná plocha. Na iPhone sa innerHeight, visualViewport a clientHeight líšia podľa lišty Safari;
-       berieme najmenšiu, aby spodok kytice nikdy neskončil pod lištou (pozadie pod plátnom má rovnakú farbu). */
     function viewportSize() {
       var w = window.innerWidth, h = window.innerHeight;
       var scr = window.screen;
@@ -160,7 +157,6 @@
       debugEl.textContent = info;
     }
 
-    /* Nativny responsivny layout - pozadie cez celú obrazovku, kytica v bezpečnej zóne na mobile aj PC */
     function layout() {
       var vp = viewportSize();
       var vw = vp.w;
@@ -177,22 +173,17 @@
       var colOffset = 0, rowOffset = 0, bouquetRows = 0;
 
       if (isPortrait) {
-        // Mobil / Portrait: plátno natívne vyplní celú obrazovku s ~110 stĺpcami
         cols = TARGET_COLS;
         cw = vw / cols;
         fs = cw / fontRatio;
         ch = fs * 1.20;
         rows = Math.max(24, Math.round(vh / ch));
         ch = vh / rows;
-        // Hore kytica začína pod výrezom / Dynamic Islandom.
-        // Dole žiadna rezerva: stonky rastú priamo zo spodného okraja displeja (aj pod domovskou lištou).
         var topRows = Math.ceil(ins.top / ch);
         rowOffset = topRows;
         bouquetRows = Math.max(20, rows - topRows);
         Hu = (bouquetRows * ch) / (cols * cw);
       } else {
-        // Desktop / PC (Landscape): majestátna kytica vycentrovaná v strede širokouhlého monitora
-        // Kytica zaberá elegantných ~92% výšky obrazovky bez akýchkoľvek okrajov či výrezov
         var availH = Math.max(vh * 0.5, vh - ins.top - ins.bottom);
         var targetBouquetH = availH * 0.92;
         var targetBouquetW = targetBouquetH / 1.36;
@@ -293,18 +284,15 @@
       var T = (reduce || forcedBloom) ? 6.0 : (now - t0) * 0.001;
       var time = reduce ? 0 : now * 0.001;
 
-      // Organická reakcia stoniek na pohyb
       currentMouseWind += (targetWind - currentMouseWind) * 0.06;
 
       render(time, T, currentMouseWind);
       requestAnimationFrame(frame);
     }
 
-    /* Opätovné rozkvitnutie po kliknutí / ťuknutí kdekoľvek na obrazovku */
     var lastRebloomTime = 0;
     function rebloom() {
       var now = performance.now();
-      // Ochrana pred dvojitým spustením (touchend + syntetizovaný click na mobilných prehliadačoch)
       if (now - lastRebloomTime < 400) return;
       lastRebloomTime = now;
 
@@ -314,12 +302,10 @@
       bouquet = BouquetScene.buildBouquet(currentSeed, Hu, bouquetOpts);
     }
 
-    // Kliknutie myšou na PC
     window.addEventListener('click', function () {
       rebloom();
     });
 
-    // Ťuknutie na mobile (odlíšenie tapu od posunu prsta)
     var touchStartX = 0, touchStartY = 0, touchStartTime = 0;
     window.addEventListener('touchstart', function (e) {
       if (e.touches && e.touches[0]) {
@@ -334,14 +320,12 @@
       var dx = (e.changedTouches && e.changedTouches[0]) ? Math.abs(e.changedTouches[0].clientX - touchStartX) : 0;
       var dy = (e.changedTouches && e.changedTouches[0]) ? Math.abs(e.changedTouches[0].clientY - touchStartY) : 0;
 
-      // Ak išlo o krátke ťuknutie na mieste, spustiť rozkvitnutie
       if (dt < 350 && dx < 12 && dy < 12) {
         rebloom();
       }
       targetWind = 0;
     }, { passive: true });
 
-    // Jemný vánok pri pohybe myši
     window.addEventListener('mousemove', function (e) {
       var relX = (e.clientX / window.innerWidth) - 0.5;
       targetWind = relX * 1.5;
@@ -351,7 +335,6 @@
       targetWind = 0;
     });
 
-    // Jemný vánok pri ťahaní prstom po displeji
     window.addEventListener('touchmove', function (e) {
       if (e.touches && e.touches[0]) {
         var relX = (e.touches[0].clientX / window.innerWidth) - 0.5;
@@ -359,7 +342,6 @@
       }
     }, { passive: true });
 
-    // Nativne prispôsobenie pri otočení obrazovky alebo zmene okna
     window.addEventListener('resize', function () {
       layout();
     });
@@ -368,7 +350,6 @@
         layout();
       });
     }
-    // iOS pri otočení a pri návrate na stránku hlási rozmery s oneskorením
     window.addEventListener('orientationchange', function () {
       setTimeout(layout, 300);
     });

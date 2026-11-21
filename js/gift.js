@@ -1,5 +1,3 @@
-// js/gift.js
-// Dedication card ("Venovať kyticu") and URL share management
 
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -23,7 +21,6 @@
 
     function sanitizeText(str, maxLen) {
       if (typeof str !== 'string') return '';
-      // Odstránenie riadiacich znakov zabraňuje poškodeniu rozloženia a DOM injekciám
       var clean = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
       return (clean.length > maxLen) ? clean.slice(0, maxLen) : clean;
     }
@@ -99,7 +96,6 @@
       if (shareModal) shareModal.classList.remove('open');
     }
 
-    // Inicializácia pri načítaní
     var initial = getParams();
     applyDedication(initial);
     if (initial.to || initial.msg || initial.from) {

@@ -70,7 +70,6 @@ server.listen(PORT, async () => {
     console.log(`[PASS] Chrome rendered screenshot successfully (${stats.size} bytes)!`);
     assert(stats.size > 15000, 'Screenshot file must have non-trivial image size');
 
-    // Clean up
     fs.unlinkSync(screenshotPath);
     try {
       fs.rmSync(tempUserData, { recursive: true, force: true });
